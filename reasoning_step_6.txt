@@ -1,0 +1,39 @@
+=== BATCH 6 (BACKTRACK) ===
+
+--- Step 18 ---
+Action: BACKTRACK to step 2
+
+Reasoning: Multiple attempts at approaching the (1,3)-(1,4) region have failed.
+The core issue: cells (0,3)=2, (1,2)=1, (1,3)=3, (1,4)=3 create tight constraints.
+Any path through dots (0,3), (1,3), (1,4), (2,4) tends to fill them too fast.
+
+New strategy:
+- Use V[0][1] as cell (0,0)'s 3rd edge instead of H[1][0]
+- This leaves H[1][0] available for later
+- Build the loop around the perimeter before tackling the inner region
+- Approach the 3-3 region from the right side of the grid
+
+Grid after step 18 (state after step 2):
++---+   +   +   +   +
+| 3   .   .   2   .
++   +   +   +   +   +
+  .   2   1   3   3
++   +   +   +   +   +
+  .   .   2   .   2
++   +   +   +   +   +
+  .   .   0   .   2
++   +   +   +   +   +
+  .   3   .   3   .
++   +   +   +   +   +
+
+Current state after backtrack:
+- Path: (0,1)--(0,0)--(1,0)
+- Endpoints: (0,1), (1,0)
+- Edges in loop: H[0][0], V[0][0]
+- Cell (0,0)=3 has 2 edges, needs 1 more (V[0][1] or H[1][0])
+
+=== VALIDATOR OUTPUT ===
+✓ Grid is valid (no rule violations)
+✓ All cells remain satisfiable
+
+=== END BATCH 6 ===

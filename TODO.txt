@@ -1,0 +1,18 @@
+0. Allow to do multiple steps at the same time to speed up
+0. Ask the model to evaluate as well if the lessons was effectively used and useful. 
+1. Create a tree representation of trials and errors ?
+2. Make it write a text containing lessons on how to solve this kind of puzzles, a sort of externalisation 
+of its knowledge as it is learning. 
+3. Think about how to do similar things with math.
+4. Think of what this experiment changes for "teaching the AI", and producing knowledge using AI, interpretability, etc. 
+In a sense with this we don't just trust the AI and let it do everything, but we make it produce knowledge that we can understand. 
+It is not anymore learning statistically through examples but learning by stages and progressive generalisation of knowledge 
+gained through the examples.
+5. Remove the steps between errors to keep memory smaller.
+
+Note: most reasoning steps are descriptive, but we want things that explain and give a good reason 
+
+Note: like in problem-solving, we can first ask the model to think about a strategy, then execute it., and then 
+review and discuss. 
+
+Note: can the agent self-reflect ? On the effect of a certain approach, strategy or decision. 

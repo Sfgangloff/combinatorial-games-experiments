@@ -1,0 +1,113 @@
+=== BATCH 2 (Steps 6 to 10) ===
+
+Current state: Path (1,2)--(0,2)--(0,1)--(0,0)--(1,0)--(1,1). Endpoints: (1,2), (1,1).
+
+--- Step 6 ---
+Action: Add edge H[1][2]
+Reasoning: Extending from endpoint (1,2). Cell (1,2)=1 needs exactly 1 edge.
+H[1][2] is the top edge of cell (1,2). Adding it satisfies cell (1,2)=1.
+Path extends to (1,3). Endpoints: (1,3), (1,1).
+Grid after step 6:
++---+---+   +   +   +
+| 3   . | .   2   .
++---+   +---+   +   +
+  .   2   1   3   3
++   +   +   +   +   +
+  .   .   2   .   2
++   +   +   +   +   +
+  .   .   0   .   2
++   +   +   +   +   +
+  .   3   .   3   .
++   +   +   +   +   +
+
+--- Step 7 ---
+Action: Add edge H[1][3]
+Reasoning: Extending from endpoint (1,3) toward the adjacent 3s at (1,3) and (1,4).
+H[1][3] is the top edge of cell (1,3)=3. Path extends to (1,4).
+Endpoints: (1,4), (1,1).
+Grid after step 7:
++---+---+   +   +   +
+| 3   . | .   2   .
++---+   +---+---+   +
+  .   2   1   3   3
++   +   +   +   +   +
+  .   .   2   .   2
++   +   +   +   +   +
+  .   .   0   .   2
++   +   +   +   +   +
+  .   3   .   3   .
++   +   +   +   +   +
+
+--- Step 8 ---
+Action: Add edge V[1][4]
+Reasoning: Cells (1,3)=3 and (1,4)=3 are adjacent, sharing edge V[1][4].
+For adjacent 3s, the shared edge MUST be in the loop. V[1][4] is forced.
+This gives cell (1,3) its 2nd edge (H[1][3]+V[1][4]) and cell (1,4) its 1st edge.
+Path extends to (2,4). Endpoints: (2,4), (1,1).
+Grid after step 8:
++---+---+   +   +   +
+| 3   . | .   2   .
++---+   +---+---+   +
+  .   2   1   3 | 3
++   +   +   +   +   +
+  .   .   2   .   2
++   +   +   +   +   +
+  .   .   0   .   2
++   +   +   +   +   +
+  .   3   .   3   .
++   +   +   +   +   +
+
+--- Step 9 ---
+Action: Add edge V[2][4]
+Reasoning: Extending from endpoint (2,4) downward.
+V[2][4] is the left edge of cell (2,4)=2, giving it 1 edge.
+Path extends to (3,4). Endpoints: (3,4), (1,1).
+Grid after step 9:
++---+---+   +   +   +
+| 3   . | .   2   .
++---+   +---+---+   +
+  .   2   1   3 | 3
++   +   +   +   +   +
+  .   .   2   . | 2
++   +   +   +   +   +
+  .   .   0   .   2
++   +   +   +   +   +
+  .   3   .   3   .
++   +   +   +   +   +
+
+--- Step 10 ---
+Action: Add edge V[3][4]
+Reasoning: Extending from endpoint (3,4) downward toward the bottom area.
+V[3][4] is the left edge of cell (3,4)=2, giving it 1 edge.
+Path extends to (4,4). Endpoints: (4,4), (1,1).
+Grid after step 10:
++---+---+   +   +   +
+| 3   . | .   2   .
++---+   +---+---+   +
+  .   2   1   3 | 3
++   +   +   +   +   +
+  .   .   2   . | 2
++   +   +   +   +   +
+  .   .   0   . | 2
++   +   +   +   +   +
+  .   3   .   3   .
++   +   +   +   +   +
+
+=== VALIDATOR OUTPUT ===
+✗ Grid has 2 violation(s):
+  - UNSATISFIABLE cell (1,3)=3: has 2 edges, can add 0 more, needs 3 total
+  - UNSATISFIABLE cell (1,4)=3: has 1 edges, can add 1 more, needs 3 total
+
+=== FAILURE ANALYSIS ===
+Root cause: Step 7 (adding H[1][3]) routed the path through dot (1,4) horizontally.
+- Dot (1,4) became full after H[1][3] + V[1][4] (2 edges)
+- Dot (2,4) became full after V[1][4] + V[2][4] (2 edges)
+- This blocked H[1][4] and H[2][4], which cell (1,4)=3 needs
+- Cell (1,3)=3 also became unsatisfiable (stuck at 2 edges)
+
+Lesson: The 3-3 pair at (1,3)-(1,4) cannot be approached horizontally through H[1][3].
+The path must approach from a different direction to leave room for all required edges.
+
+Last valid step: Step 6 (after adding H[1][2])
+
+=== BATCH 2 FAILED - BACKTRACK REQUIRED ===

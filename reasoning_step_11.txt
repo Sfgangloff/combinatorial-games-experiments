@@ -1,0 +1,121 @@
+=== BATCH 11 (Steps 35 to 39) ===
+
+Current state (after step 34):
+Path: (0,1)--top edge--(0,5)--(1,5)  and  (0,1)--(0,0)--(1,0)
+Endpoints: (1,0), (1,5)
+Forced edges: H[1][0] for cell (0,0)=3, H[1][3] for cell (0,3)=2
+
+Strategy: Go down one step then turn left to preserve cell (1,4)=3 satisfiability.
+
+--- Step 35 ---
+Action: Add edge V[1][5]
+Reasoning: From endpoint (1,5), go down.
+V[1][5] connects (1,5) and (2,5). V[1][5] is the right edge of cell (1,4)=3.
+Dot (1,5): V[0][5]+V[1][5] = 2 edges (full). H[1][4] now blocked.
+Cell (1,4)=3: V[1][5] = 1 edge. Needs H[2][4]+V[1][4] (since H[1][4] blocked).
+Path extends to (2,5). Endpoints: (1,0), (2,5).
+Grid after step 35:
++---+---+---+---+---+
+| 3   .   .   2   . |
++   +   +   +   +   +
+  .   2   1   3   3 |
++   +   +   +   +   +
+  .   .   2   .   2
++   +   +   +   +   +
+  .   .   0   .   2
++   +   +   +   +   +
+  .   3   .   3   .
++   +   +   +   +   +
+
+--- Step 36 ---
+Action: Add edge H[2][4]
+Reasoning: From endpoint (2,5), go LEFT (not down - that would block H[2][4] and make cell (1,4) unsatisfiable).
+H[2][4] connects (2,5) and (2,4). H[2][4] is the bottom edge of cell (1,4)=3.
+Dot (2,5): V[1][5]+H[2][4] = 2 edges (full). V[2][5] now blocked.
+Cell (1,4)=3: V[1][5]+H[2][4] = 2 edges. Needs V[1][4] for 3rd.
+Cell (2,4)=2: H[2][4] = 1 edge. Needs H[3][4] (since V[2][5] blocked).
+Path extends to (2,4). Endpoints: (1,0), (2,4).
+Grid after step 36:
++---+---+---+---+---+
+| 3   .   .   2   . |
++   +   +   +   +   +
+  .   2   1   3   3 |
++   +   +   +   +---+
+  .   .   2   .   2
++   +   +   +   +   +
+  .   .   0   .   2
++   +   +   +   +   +
+  .   3   .   3   .
++   +   +   +   +   +
+
+--- Step 37 ---
+Action: Add edge V[1][4]
+Reasoning: From endpoint (2,4), go up.
+V[1][4] connects (2,4) and (1,4). V[1][4] is the left edge of cell (1,4)=3.
+Dot (2,4): H[2][4]+V[1][4] = 2 edges (full). H[2][3] and V[2][4] now blocked.
+Cell (1,4)=3: V[1][5]+H[2][4]+V[1][4] = 3 edges. SATISFIED!
+Path extends to (1,4). Endpoints: (1,0), (1,4).
+Grid after step 37:
++---+---+---+---+---+
+| 3   .   .   2   . |
++   +   +   +   +   +
+  .   2   1   3   3 |
++   +   +   +   +   +
+  .   .   2   . | 2
++   +   +   +   +---+
+  .   .   0   .   2
++   +   +   +   +   +
+  .   3   .   3   .
++   +   +   +   +   +
+
+--- Step 38 ---
+Action: Add edge H[1][3]
+Reasoning: From endpoint (1,4), options are limited (V[0][4] blocked, H[1][4] blocked). Go left.
+H[1][3] connects (1,4) and (1,3). H[1][3] is the bottom edge of cell (0,3)=2.
+Dot (1,4): V[1][4]+H[1][3] = 2 edges (full). H[1][4] blocked (was already).
+Cell (0,3)=2: H[0][3]+H[1][3] = 2 edges. SATISFIED!
+Cell (1,3)=3: V[1][4]+H[1][3] = 2 edges. Needs V[1][3] or H[2][3] for 3rd.
+Path extends to (1,3). Endpoints: (1,0), (1,3).
+Grid after step 38:
++---+---+---+---+---+
+| 3   .   .   2   . |
++   +   +   +---+   +
+  .   2   1   3   3 |
++   +   +   +   +   +
+  .   .   2   . | 2
++   +   +   +   +---+
+  .   .   0   .   2
++   +   +   +   +   +
+  .   3   .   3   .
++   +   +   +   +   +
+
+--- Step 39 ---
+Action: Add edge V[1][3]
+Reasoning: From endpoint (1,3), go down.
+V[1][3] connects (1,3) and (2,3). V[1][3] is the left edge of cell (1,3)=3 and right edge of cell (1,2)=1.
+Dot (1,3): H[1][3]+V[1][3] = 2 edges (full). H[1][2] and V[0][3] now blocked.
+Cell (1,3)=3: V[1][4]+H[1][3]+V[1][3] = 3 edges. SATISFIED!
+Cell (1,2)=1: V[1][3] = 1 edge. SATISFIED!
+Path extends to (2,3). Endpoints: (1,0), (2,3).
+Grid after step 39:
++---+---+---+---+---+
+| 3   .   .   2   . |
++   +   +   +---+   +
+  .   2   1 | 3 | 3 |
++   +   +   +   +---+
+  .   .   2   .   2
++   +   +   +   +   +
+  .   .   0   .   2
++   +   +   +   +   +
+  .   3   .   3   .
++   +   +   +   +   +
+
+=== VALIDATOR OUTPUT ===
+✓ Grid is valid (no rule violations)
+✓ All cells remain satisfiable
+
+⚠ Hints (2 forced edge(s) detected):
+  - FORCED edges for cell (0, 0)=3: ['bottom H']
+  - FORCED edges for cell (2, 4)=2: ['bottom H']
+
+=== END BATCH 11 ===

@@ -1,0 +1,47 @@
+=== BATCH 3 (BACKTRACK) ===
+
+--- Step 11 ---
+Action: BACKTRACK to step 6
+
+Reasoning: Batch 2 steps 7-10 led to unsatisfiable cells (1,3)=3 and (1,4)=3.
+
+Root cause analysis:
+- Step 7 added H[1][3], routing the path through dot (1,4) horizontally
+- This filled dot (1,4) after adding V[1][4] (the shared edge of adjacent 3s)
+- Continuing down V[2][4] filled dot (2,4)
+- Both H[1][4] and H[2][4] became blocked
+- Cell (1,4)=3 could only reach 2 edges (V[1][4] + at most V[1][5])
+- Cell (1,3)=3 could only reach 2 edges (H[1][3] + V[1][4])
+
+Alternative approach for next batch:
+From endpoint (1,3) after step 6, instead of going right via H[1][3]:
+- Go DOWN via V[1][3] to (2,3)
+- This preserves dot (1,4) capacity for the 3-3 region
+- The path can then approach cells (1,3) and (1,4) from below or around
+
+Grid after step 11:
++---+---+   +   +   +
+| 3   . | .   2   .
++---+   +---+   +   +
+  .   2   1   3   3
++   +   +   +   +   +
+  .   .   2   .   2
++   +   +   +   +   +
+  .   .   0   .   2
++   +   +   +   +   +
+  .   3   .   3   .
++   +   +   +   +   +
+
+Current state after backtrack:
+- Path: (1,1)--(1,0)--(0,0)--(0,1)--(0,2)--(1,2)--(1,3)
+- Endpoints: (1,1), (1,3)
+- Edges in loop: H[0][0], H[0][1], V[0][0], H[1][0], V[0][2], H[1][2]
+
+=== VALIDATOR OUTPUT ===
+✓ Grid is valid (no rule violations)
+✓ All cells remain satisfiable
+
+⚠ Hints (1 forced edge(s) detected):
+  - FORCED edges for cell (1, 1)=2: ['bottom H', 'left V']
+
+=== END BATCH 3 ===

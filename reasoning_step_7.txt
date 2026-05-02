@@ -1,0 +1,114 @@
+=== BATCH 7 (Steps 19 to 23) ===
+
+Current state (after backtrack to step 2):
+Path: (0,1)--(0,0)--(1,0)
+Endpoints: (0,1), (1,0)
+Cell (0,0)=3 has 2 edges, needs 1 more.
+
+Strategy: Build around the perimeter first, then tackle inner cells.
+
+--- Step 19 ---
+Action: Add edge V[0][1]
+Reasoning: From endpoint (0,1), add V[0][1] to give cell (0,0) its 3rd edge.
+V[0][1] connects (0,1) and (1,1). V[0][1] is the right edge of cell (0,0).
+Cell (0,0)=3: H[0][0]+V[0][0]+V[0][1] = 3 edges (SATISFIED).
+Dot (0,1): H[0][0]+V[0][1] = 2 edges (full). H[0][1] is now blocked.
+Path extends to (1,1). Endpoints: (1,0), (1,1).
+Grid after step 19:
++---+   +   +   +   +
+| 3 | .   .   2   .
++   +   +   +   +   +
+  .   2   1   3   3
++   +   +   +   +   +
+  .   .   2   .   2
++   +   +   +   +   +
+  .   .   0   .   2
++   +   +   +   +   +
+  .   3   .   3   .
++   +   +   +   +   +
+
+--- Step 20 ---
+Action: Add edge V[1][0]
+Reasoning: From endpoint (1,0), extend down the left side of the grid.
+V[1][0] connects (1,0) and (2,0).
+Dot (1,0): V[0][0]+V[1][0] = 2 edges (full). H[1][0] is now blocked.
+Cell (1,0)=. has V[0][0]+V[1][0] = 2 edges.
+Path extends to (2,0). Endpoints: (2,0), (1,1).
+Grid after step 20:
++---+   +   +   +   +
+| 3 | .   .   2   .
++   +   +   +   +   +
+| .   2   1   3   3
++   +   +   +   +   +
+  .   .   2   .   2
++   +   +   +   +   +
+  .   .   0   .   2
++   +   +   +   +   +
+  .   3   .   3   .
++   +   +   +   +   +
+
+--- Step 21 ---
+Action: Add edge V[2][0]
+Reasoning: Continue down the left side from endpoint (2,0).
+V[2][0] connects (2,0) and (3,0).
+Dot (2,0): V[1][0]+V[2][0] = 2 edges (full).
+Cell (2,0)=. has V[1][0]+V[2][0] = 2 edges.
+Path extends to (3,0). Endpoints: (3,0), (1,1).
+Grid after step 21:
++---+   +   +   +   +
+| 3 | .   .   2   .
++   +   +   +   +   +
+| .   2   1   3   3
++   +   +   +   +   +
+| .   .   2   .   2
++   +   +   +   +   +
+  .   .   0   .   2
++   +   +   +   +   +
+  .   3   .   3   .
++   +   +   +   +   +
+
+--- Step 22 ---
+Action: Add edge V[3][0]
+Reasoning: Continue down the left side from endpoint (3,0).
+V[3][0] connects (3,0) and (4,0).
+Dot (3,0): V[2][0]+V[3][0] = 2 edges (full).
+Cell (3,0)=. has V[2][0]+V[3][0] = 2 edges.
+Path extends to (4,0). Endpoints: (4,0), (1,1).
+Grid after step 22:
++---+   +   +   +   +
+| 3 | .   .   2   .
++   +   +   +   +   +
+| .   2   1   3   3
++   +   +   +   +   +
+| .   .   2   .   2
++   +   +   +   +   +
+| .   .   0   .   2
++   +   +   +   +   +
+  .   3   .   3   .
++   +   +   +   +   +
+
+--- Step 23 ---
+Action: Add edge H[4][0]
+Reasoning: From endpoint (4,0), turn right along the bottom edge.
+H[4][0] connects (4,0) and (4,1).
+Dot (4,0): V[3][0]+H[4][0] = 2 edges (full).
+Cell (4,0)=. has V[3][0]+H[4][0] = 2 edges.
+Path extends to (4,1). Endpoints: (4,1), (1,1).
+Grid after step 23:
++---+   +   +   +   +
+| 3 | .   .   2   .
++   +   +   +   +   +
+| .   2   1   3   3
++   +   +   +   +   +
+| .   .   2   .   2
++   +   +   +   +   +
+| .   .   0   .   2
++---+   +   +   +   +
+  .   3   .   3   .
++   +   +   +   +   +
+
+=== VALIDATOR OUTPUT ===
+✓ Grid is valid (no rule violations)
+✓ All cells remain satisfiable
+
+=== END BATCH 7 ===
