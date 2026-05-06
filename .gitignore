@@ -1,6 +1,10 @@
 __pycache__/
 *.pyc
 .DS_Store
+.venv/
+*.egg-info/
+build/
+dist/
 
 # Personal notes — kept locally, not tracked
 legacy/slitherlink-batch-experiment/TODO.txt

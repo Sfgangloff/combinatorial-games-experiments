@@ -14,13 +14,34 @@ We deliberately avoid handing Claude a SAT solver. The point isn't to solve the 
 README.md                 - this file
 CLAUDE.md                 - project context shown to Claude Code
 rules.md                  - the rules of Slitherlink
-validate_grid.py          - grid parser + validator (reused across tools)
-puzzles/                  - test corpus (planned)
+validate_grid.py          - legacy validator script (kept for reference)
+pyproject.toml            - package + deps (fastmcp)
+core/                     - shared engine: state, parser, render, propagation, analysis
 servers/
   slitherlink-fine/       - ~15 primitive tools, no inference (planned)
-  slitherlink-medium/     - ~8 tools with local deductions baked in (planned)
+  slitherlink-medium/     - ~9 tools with local deductions baked in
   slitherlink-coarse/     - minimal tools + "suggest next move" (planned)
+tests/                    - smoke tests for core/ and each server
+puzzles/                  - test corpus (planned)
 legacy/                   - prior experiments (see below)
+```
+
+### Running the servers
+
+```
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -e .
+python -m tests.test_core            # core smoke test
+python -m tests.test_medium_server   # medium server smoke test
+```
+
+To register a server with Claude Code:
+
+```
+claude mcp add slitherlink-medium -- \
+    /absolute/path/to/.venv/bin/python \
+    /absolute/path/to/servers/slitherlink-medium/server.py
 ```
 
 ### Tool granularities under comparison
