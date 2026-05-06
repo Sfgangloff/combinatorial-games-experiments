@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.DS_Store
+
+# Personal notes — kept locally, not tracked
+legacy/slitherlink-batch-experiment/TODO.txt
+legacy/slitherlink-batch-experiment/chatgpt_improvement_plan.md
