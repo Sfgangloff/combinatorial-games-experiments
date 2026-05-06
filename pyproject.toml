@@ -1,0 +1,15 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "slitherlink-experiments"
+version = "0.1.0"
+description = "MCP tool sets for Slitherlink solving — fine/medium/coarse comparison"
+requires-python = ">=3.10"
+dependencies = [
+    "fastmcp>=0.2.0",
+]
+
+[tool.setuptools.packages.find]
+include = ["core*"]
