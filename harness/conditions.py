@@ -7,6 +7,9 @@ always present.
 """
 from __future__ import annotations
 
+import re
+import shutil
+import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
@@ -38,6 +41,40 @@ def _stdio(server_dir: str) -> dict:
     }
 
 
+def discover_meta_tools_config() -> dict | None:
+    """
+    Look up the meta-tools MCP server from `claude mcp get meta-tools` and
+    return an McpStdioServerConfig for it. Returns None if the CLI isn't
+    available or meta-tools isn't configured.
+    """
+    if shutil.which("claude") is None:
+        return None
+    try:
+        out = subprocess.run(
+            ["claude", "mcp", "get", "meta-tools"],
+            capture_output=True, text=True, timeout=10,
+        )
+    except (subprocess.TimeoutExpired, OSError):
+        return None
+    if out.returncode != 0:
+        return None
+    text = out.stdout
+    type_match = re.search(r"Type:\s*(\S+)", text)
+    cmd_match = re.search(r"Command:\s*(.+)", text)
+    args_match = re.search(r"Args:\s*(.*)", text)
+    if not (type_match and cmd_match and args_match):
+        return None
+    if type_match.group(1).strip().lower() != "stdio":
+        return None
+    args_str = args_match.group(1).strip()
+    args = args_str.split() if args_str else []
+    return {
+        "type": "stdio",
+        "command": cmd_match.group(1).strip(),
+        "args": args,
+    }
+
+
 def mcp_servers_for(condition: Condition) -> dict[str, dict]:
     """Build the mcp_servers dict for a given Condition. Judge is always included."""
     servers: dict[str, dict] = {
@@ -47,8 +84,10 @@ def mcp_servers_for(condition: Condition) -> dict[str, dict]:
         servers[f"slitherlink-{condition.toolset}"] = _stdio(
             f"slitherlink-{condition.toolset}"
         )
-    if condition.meta and condition.meta_tools_config is not None:
-        servers["meta-tools"] = condition.meta_tools_config
+    if condition.meta:
+        cfg = condition.meta_tools_config or discover_meta_tools_config()
+        if cfg is not None:
+            servers["meta-tools"] = cfg
     return servers
 
 

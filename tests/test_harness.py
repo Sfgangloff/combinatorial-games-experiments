@@ -26,13 +26,7 @@ def test_toolset_inclusion():
     assert servers == {"slitherlink-judge": servers["slitherlink-judge"]}
 
 
-def test_meta_only_with_explicit_config():
-    # Without explicit meta_tools_config, meta=True still doesn't add a server
-    # (we don't make assumptions about how to launch user's meta-tools server).
-    cond = Condition(toolset="medium", meta=True)
-    servers = mcp_servers_for(cond)
-    assert "meta-tools" not in servers
-
+def test_meta_explicit_config_overrides_discovery():
     cond = Condition(
         toolset="medium",
         meta=True,
@@ -40,6 +34,13 @@ def test_meta_only_with_explicit_config():
     )
     servers = mcp_servers_for(cond)
     assert "meta-tools" in servers
+    assert servers["meta-tools"]["command"] == "/usr/bin/true"
+
+
+def test_meta_off_never_includes_metatools():
+    for ts in ("none", "fine", "medium", "coarse"):
+        servers = mcp_servers_for(Condition(toolset=ts, meta=False))
+        assert "meta-tools" not in servers
 
 
 def test_allowed_globs_match_servers():
@@ -54,8 +55,10 @@ def main():
     print("judge_always_present OK")
     test_toolset_inclusion()
     print("toolset_inclusion OK")
-    test_meta_only_with_explicit_config()
-    print("meta_only_with_explicit_config OK")
+    test_meta_explicit_config_overrides_discovery()
+    print("meta_explicit_config_overrides_discovery OK")
+    test_meta_off_never_includes_metatools()
+    print("meta_off_never_includes_metatools OK")
     test_allowed_globs_match_servers()
     print("allowed_globs_match_servers OK")
     print("\nAll harness smoke tests passed.")
