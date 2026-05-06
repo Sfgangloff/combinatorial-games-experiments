@@ -1,0 +1,11 @@
+{
+  "puzzles": [
+    {
+      "id": "puzzle_001",
+      "size": "5x5",
+      "difficulty": "easy",
+      "source": "carried over from legacy/slitherlink-batch-experiment/grid_step_0.txt",
+      "file": "puzzle_001.txt"
+    }
+  ]
+}

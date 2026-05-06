@@ -9,6 +9,7 @@ description = "MCP tool sets for Slitherlink solving — fine/medium/coarse comp
 requires-python = ">=3.10"
 dependencies = [
     "fastmcp>=0.2.0",
+    "claude-agent-sdk>=0.1.75",
 ]
 
 [tool.setuptools.packages.find]
