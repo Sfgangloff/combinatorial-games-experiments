@@ -6,6 +6,30 @@
       "difficulty": "easy",
       "source": "carried over from legacy/slitherlink-batch-experiment/grid_step_0.txt",
       "file": "puzzle_001.txt"
+    },
+    {
+      "id": "puzzle_002",
+      "size": "7x7",
+      "difficulty": "hard",
+      "source": "puzzle-loop.com 7x7 Hard, task=322a2e23a331a3f3b2a13a2b3a213a2d222 (Puzzle ID 25,425)",
+      "notes": "Tier 3: coarse engine (propagation + 1-ply lookahead) plateaus at 17 steps with 68/112 edges unknown. Unique solution verified by backtracking.",
+      "file": "puzzle_002.txt"
+    },
+    {
+      "id": "puzzle_003",
+      "size": "25x30",
+      "difficulty": "hard",
+      "source": "puzzle-loop.com 25x30 Hard (Puzzle ID 3,970,906), transcribed from PDF",
+      "notes": "30 rows x 25 cols, 330 clues. Verified char-for-char against pdftotext -layout extraction.",
+      "file": "puzzle_003.txt"
+    },
+    {
+      "id": "puzzle_004",
+      "size": "15x15",
+      "difficulty": "hard",
+      "source": "puzzle-loop.com 15x15 Hard (Puzzle ID 5,504,389), transcribed from PDF",
+      "notes": "15 rows x 15 cols, 102 clues. Transcribed from Slitherlink - 15x15.pdf via pdftotext -layout; format validated, all cells satisfiable.",
+      "file": "puzzle_004.txt"
     }
   ]
 }
