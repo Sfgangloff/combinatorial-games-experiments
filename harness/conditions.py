@@ -18,7 +18,7 @@ REPO = Path(__file__).resolve().parent.parent
 VENV_PYTHON = REPO / ".venv" / "bin" / "python"
 
 
-Toolset = Literal["none", "fine", "medium", "coarse"]
+Toolset = Literal["none", "fine", "medium", "coarse", "scratchpad"]
 
 
 @dataclass(frozen=True)

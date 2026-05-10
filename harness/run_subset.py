@@ -41,7 +41,7 @@ async def main(args: argparse.Namespace) -> None:
 def _parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser()
     p.add_argument("puzzle_id")
-    p.add_argument("toolsets", nargs="+", choices=["none", "fine", "medium", "coarse"])
+    p.add_argument("toolsets", nargs="+", choices=["none", "fine", "medium", "coarse", "scratchpad"])
     p.add_argument("--meta", action="store_true")
     p.add_argument("--max-turns", type=int, default=200)
     p.add_argument("--model", default=None)
