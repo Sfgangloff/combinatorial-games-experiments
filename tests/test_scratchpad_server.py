@@ -29,7 +29,7 @@ async def main():
     expected = {
         "load", "render", "apply_edge", "forced_moves", "check_consistency",
         "endpoints", "solved", "assume", "commit", "retract", "frames",
-        "current_frame",
+        "current_frame", "try_both",
     }
     actual = set(tools.keys())
     assert expected <= actual, f"missing tools: {expected - actual}"
@@ -176,6 +176,46 @@ async def main():
         bogus = server.retract(handle=dh, frame_id="not-a-frame")
         assert "error" in bogus, bogus
         print(f"  retract rejects non-top frame_id correctly")
+
+    # === try_both on a fresh handle.
+    tb_loaded = server.load(grid_text=grid_text)
+    tbh = tb_loaded["handle"]
+
+    # Edge H[3][2] sits on top of the 0-cell at (3,2). LINE branch
+    # contradicts (0-cell forbids any line); BLOCKED survives (already
+    # forced by the 0-cell). Expect outcome='forced_blocked'.
+    tb_zero = server.try_both(
+        handle=tbh, edge_type="H", row=3, col=2,
+        rationale="top edge of the 0-cell",
+    )
+    assert tb_zero["outcome"] == "forced_blocked", tb_zero
+    assert tb_zero["line_branch"]["survives"] is False
+    assert tb_zero["blocked_branch"]["survives"] is True
+    assert tb_zero["forced"] is not None
+    assert tb_zero["forced"]["value"] == "blocked"
+    print(f"try_both H[3][2] near 0-cell: outcome={tb_zero['outcome']}, "
+          f"forced blocked + {len(tb_zero['forced']['changes'])} propagated changes")
+
+    # Calling try_both on an already-determined edge should error.
+    tb_again = server.try_both(handle=tbh, edge_type="H", row=3, col=2)
+    assert "error" in tb_again, tb_again
+    print(f"  try_both rejects determined edge: {tb_again['error'][:80]}")
+
+    # try_both on an undecided edge that admits both branches → 'both_survive',
+    # state unchanged. Pick an edge far from constraints.
+    tb_loaded2 = server.load(grid_text=grid_text)
+    tbh2 = tb_loaded2["handle"]
+    summary_before = tb_loaded2["summary"]
+    tb_amb = server.try_both(
+        handle=tbh2, edge_type="V", row=0, col=2,
+        rationale="probing an undecided interior vertical edge",
+    )
+    print(f"try_both V[0][2] on fresh state: outcome={tb_amb['outcome']}")
+    # Either both survive (no info, state unchanged) or one is forced
+    # (state changed). Either is valid; we just want to verify no crash.
+    assert tb_amb["outcome"] in {
+        "both_survive", "forced_line", "forced_blocked", "neither_survives",
+    }, tb_amb
 
     print("\nAll scratchpad-server tests passed.")
 

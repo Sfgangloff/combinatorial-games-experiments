@@ -192,6 +192,105 @@ def solved(handle: str) -> dict:
 
 
 @mcp.tool
+def try_both(handle: str, edge_type: str, row: int, col: int, rationale: str = "") -> dict:
+    """
+    1-ply lookahead on a single edge in the current frame.
+
+    The engine tries both edge=line and edge=blocked in independent state
+    clones, running full local propagation in each branch. Reports which
+    branches survive (no contradiction). If exactly one branch survives,
+    the surviving value is applied to the current frame as a forced
+    deduction with full propagation — equivalent to "if assuming X
+    contradicts and assuming ¬X doesn't, then ¬X must hold."
+
+    This replaces the manual pattern of `assume(X) → contradiction →
+    retract → assume(¬X) → no contradiction → retract → apply ¬X`,
+    collapsing four calls into one.
+
+    Cost: propagation runs twice per call. Use on edges where there is a
+    plausible chance of being forced, not on every unknown edge. The
+    edge must currently be UNKNOWN in the frame; calling with a
+    determined edge returns an error.
+
+    Args:
+        edge_type: 'H' or 'V'.
+        row, col: edge indexing.
+        rationale: optional short string, for logging.
+
+    Returns:
+        line_branch:    {survives, contradiction, changes}
+        blocked_branch: {survives, contradiction, changes}
+        outcome:        'forced_line' | 'forced_blocked' | 'both_survive' | 'neither_survives'
+        forced:         null, or {value, changes, contradiction} when exactly
+                        one branch survived (the surviving value applied to the
+                        current frame with full propagation).
+    """
+    state = _top(handle)
+    current = state.get_edge(edge_type, row, col)
+    if current != EdgeState.UNKNOWN:
+        return {
+            "error": (
+                f"edge {edge_type}[{row}][{col}] is already {current.value}; "
+                f"try_both requires an UNKNOWN edge."
+            ),
+            "current_value": current.value,
+        }
+
+    # Try LINE branch on a clone.
+    line_clone = state.clone()
+    line_result = core_apply_edge(line_clone, edge_type, row, col, "line")
+    line_survives = line_result.contradiction is None
+
+    # Try BLOCKED branch on a clone.
+    blocked_clone = state.clone()
+    blocked_result = core_apply_edge(blocked_clone, edge_type, row, col, "blocked")
+    blocked_survives = blocked_result.contradiction is None
+
+    line_branch = {
+        "survives": line_survives,
+        "contradiction": line_result.contradiction,
+        "changes": [c.as_dict() for c in line_result.changes],
+    }
+    blocked_branch = {
+        "survives": blocked_survives,
+        "contradiction": blocked_result.contradiction,
+        "changes": [c.as_dict() for c in blocked_result.changes],
+    }
+
+    if line_survives and blocked_survives:
+        outcome = "both_survive"
+        forced = None
+    elif line_survives and not blocked_survives:
+        outcome = "forced_line"
+        applied = core_apply_edge(state, edge_type, row, col, "line")
+        forced = {
+            "value": "line",
+            "changes": [c.as_dict() for c in applied.changes],
+            "contradiction": applied.contradiction,
+        }
+    elif blocked_survives and not line_survives:
+        outcome = "forced_blocked"
+        applied = core_apply_edge(state, edge_type, row, col, "blocked")
+        forced = {
+            "value": "blocked",
+            "changes": [c.as_dict() for c in applied.changes],
+            "contradiction": applied.contradiction,
+        }
+    else:
+        outcome = "neither_survives"
+        forced = None
+
+    return {
+        "edge": f"{edge_type}[{row}][{col}]",
+        "rationale": rationale,
+        "outcome": outcome,
+        "line_branch": line_branch,
+        "blocked_branch": blocked_branch,
+        "forced": forced,
+    }
+
+
+@mcp.tool
 def assume(handle: str, rationale: str, edges: list[dict]) -> dict:
     """
     Open a new hypothesis frame. Clones the current top state, applies the
