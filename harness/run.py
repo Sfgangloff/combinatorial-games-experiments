@@ -35,7 +35,7 @@ from harness.conditions import (
     allowed_tool_globs_for,
     mcp_servers_for,
 )
-from harness.prompts import SYSTEM_PROMPT, user_prompt
+from harness.prompts import SYSTEM_PROMPT, SYSTEM_PROMPT_META, user_prompt
 
 REPO = Path(__file__).resolve().parent.parent
 RESULTS_DIR = REPO / "harness" / "results"
@@ -172,6 +172,7 @@ async def run_one(
     model: str | None = None,
     log: bool = True,
 ) -> dict:
+    system_prompt = SYSTEM_PROMPT_META if condition.meta else SYSTEM_PROMPT
     options = ClaudeAgentOptions(
         tools=[],  # disable all built-ins
         allowed_tools=allowed_tool_globs_for(condition),
@@ -179,7 +180,7 @@ async def run_one(
         strict_mcp_config=True,
         permission_mode="bypassPermissions",
         max_turns=max_turns,
-        system_prompt=SYSTEM_PROMPT,
+        system_prompt=system_prompt,
         model=model,
     )
 
