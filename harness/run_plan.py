@@ -51,11 +51,16 @@ _COST_TABLE: dict[tuple[str, str], float] = {
     ("puzzle_001", "none"): 1.15, ("puzzle_001", "fine"): 1.71,
     ("puzzle_001", "medium"): 1.18, ("puzzle_001", "coarse"): 0.82,
     ("puzzle_001", "scratchpad"): 1.30,
-    ("puzzle_002", "none"): 5.28, ("puzzle_002", "fine"): 4.99,
-    ("puzzle_002", "medium"): 3.61, ("puzzle_002", "coarse"): 2.32,
-    ("puzzle_002", "scratchpad"): 2.58,
+    ("puzzle_002", "none"): 4.75, ("puzzle_002", "fine"): 4.45,
+    ("puzzle_002", "medium"): 3.29, ("puzzle_002", "coarse"): 2.59,
+    ("puzzle_002", "scratchpad"): 3.67,
+    # Phase-2 generated frontier puzzles. Initial guesses extrapolated
+    # from puzzle_002 (tier-3 by formal grading is harder than puzzle_002
+    # which engine plateaus on at tier-3); revise after first window.
+    ("gen_7x7_s1_00", "none"): 6.50, ("gen_7x7_s1_00", "fine"): 5.50,
+    ("gen_7x7_s1_00", "medium"): 4.00, ("gen_7x7_s1_00", "coarse"): 3.25,
 }
-_DEFAULT_COST = 3.00
+_DEFAULT_COST = 5.00
 
 
 def _predicted_cost(puzzle_id: str, toolset: str) -> float:

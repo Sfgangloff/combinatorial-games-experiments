@@ -98,11 +98,11 @@ def allowed_tool_globs_for(condition: Condition) -> list[str]:
 
 ALL_CONDITIONS: list[Condition] = [
     Condition(toolset="none", meta=False),
-    Condition(toolset="none", meta=True),
     Condition(toolset="fine", meta=False),
-    Condition(toolset="fine", meta=True),
     Condition(toolset="medium", meta=False),
-    Condition(toolset="medium", meta=True),
     Condition(toolset="coarse", meta=False),
-    Condition(toolset="coarse", meta=True),
 ]
+# meta=True cells removed 2026-05-21: see memory
+# meta-axis-dropped-cost-infeasible (two fair-test attempts burned
+# $39.18 on subscription compute without completing). The meta axis
+# is footnote/appendix only; --meta-probe still works for isolated runs.
