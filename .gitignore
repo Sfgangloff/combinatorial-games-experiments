@@ -11,3 +11,14 @@ harness/results/
 legacy/slitherlink-batch-experiment/TODO.txt
 legacy/slitherlink-batch-experiment/chatgpt_improvement_plan.md
 notes/research_plan.md
+
+# Claude Code: track project policy (.claude/settings.json,
+# .claude/hooks/, .claude/commands/) but ignore runtime + per-user.
+.claude/settings.local.json
+.claude/scheduled_tasks.lock
+.claude/audit.log
+.claude/file-history/
+.claude/sessions/
+.claude/projects/
+.claude/cache/
+.claude/backups/

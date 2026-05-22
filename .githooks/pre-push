@@ -1,0 +1,36 @@
+#!/bin/bash
+# pre-push: reject pushes that are unsafe or violate project norms.
+# Receives lines on stdin: "<local_ref> <local_sha> <remote_ref> <remote_sha>".
+
+set -e
+
+remote="$1"
+url="$2"
+
+# 1. Reject any push that includes a force-with-lease-style overwrite of main.
+while read local_ref local_sha remote_ref remote_sha; do
+    # Empty local_sha = deletion; reject for main.
+    if [ "$local_sha" = "0000000000000000000000000000000000000000" ] && [ "$remote_ref" = "refs/heads/main" ]; then
+        echo "pre-push: refusing to delete remote main branch." >&2
+        exit 1
+    fi
+    # Non-fast-forward push to main = rejected (detect by checking remote_sha is not ancestor of local_sha).
+    if [ "$remote_ref" = "refs/heads/main" ] && [ "$remote_sha" != "0000000000000000000000000000000000000000" ]; then
+        if ! git merge-base --is-ancestor "$remote_sha" "$local_sha" 2>/dev/null; then
+            echo "pre-push: refusing non-fast-forward push to main ($remote_sha -> $local_sha)." >&2
+            echo "          this would overwrite remote history. Investigate before forcing." >&2
+            exit 1
+        fi
+    fi
+done
+
+# 2. Reject if working tree is dirty when pushing main.
+BRANCH="$(git rev-parse --abbrev-ref HEAD)"
+if [ "$BRANCH" = "main" ]; then
+    if ! git diff --quiet || ! git diff --cached --quiet; then
+        echo "pre-push: working tree is dirty on main. Commit or stash before pushing." >&2
+        exit 1
+    fi
+fi
+
+exit 0

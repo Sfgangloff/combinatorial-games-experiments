@@ -1,0 +1,143 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "_comment": "Project-shared Claude Code policy. See notes/2026-05-22_guardrails_design.md for rationale. settings.local.json overrides; that file is gitignored. Hook scripts in .claude/hooks/ are tracked.",
+
+  "permissions": {
+    "allow": [
+      "Read",
+
+      "Edit",
+      "Write",
+
+      "Bash(.venv/bin/python -m harness.run_plan:* --dry-run*)",
+      "Bash(.venv/bin/python -m harness.aggregate_phase1:*)",
+      "Bash(.venv/bin/python -m harness.visualize:*)",
+      "Bash(.venv/bin/python -m core.generator:*)",
+      "Bash(.venv/bin/python -m tests.*)",
+      "Bash(.venv/bin/python -c:*)",
+
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git show:*)",
+      "Bash(git branch:*)",
+      "Bash(git remote:*)",
+      "Bash(git stash list:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m:*)",
+      "Bash(git commit -F:*)",
+      "Bash(git push)",
+      "Bash(git push origin:*)",
+      "Bash(git fetch:*)",
+      "Bash(git pull --ff-only:*)",
+      "Bash(git config --get:*)",
+      "Bash(git rev-parse:*)",
+
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(grep:*)",
+      "Bash(rg:*)",
+      "Bash(find:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(wc:*)",
+      "Bash(pwd)",
+      "Bash(which:*)",
+      "Bash(file:*)",
+      "Bash(stat:*)",
+      "Bash(echo:*)",
+      "Bash(ps aux:*)",
+      "Bash(kill:*)",
+      "Bash(mkdir -p:*)",
+      "Bash(touch:*)",
+      "Bash(chmod +x:*)",
+      "Bash(date:*)",
+      "Bash(osascript -e display notification:*)",
+
+      "mcp__slitherlink-judge__*",
+      "mcp__slitherlink-fine__*",
+      "mcp__slitherlink-medium__*",
+      "mcp__slitherlink-coarse__*",
+      "mcp__slitherlink-scratchpad__*",
+      "mcp__math-search__arxiv_search",
+      "mcp__math-search__arxiv_get",
+      "mcp__math-search__arxiv_outline",
+      "mcp__math-search__arxiv_fetch_text",
+      "mcp__math-search__zbmath_search",
+      "mcp__math-search__wikipedia_math"
+    ],
+
+    "deny": [
+      "Bash(git push --force:*)",
+      "Bash(git push -f:*)",
+      "Bash(git push --force-with-lease:*)",
+      "Bash(git reset --hard:*)",
+      "Bash(git checkout -- :*)",
+      "Bash(git checkout .:*)",
+      "Bash(git restore --source:*)",
+      "Bash(git clean -fd:*)",
+      "Bash(git clean -fdx:*)",
+      "Bash(git branch -D:*)",
+      "Bash(git branch -d:*)",
+      "Bash(git tag -d:*)",
+      "Bash(git commit:*--no-verify*)",
+      "Bash(git commit:*--amend*)",
+      "Bash(git rebase:*)",
+      "Bash(git filter-branch:*)",
+      "Bash(git config --global:*)",
+      "Bash(git config --system:*)",
+
+      "Bash(rm -rf:*)",
+      "Bash(rm -fr:*)",
+      "Bash(rm -r /:*)",
+      "Bash(sudo:*)",
+      "Bash(dd:*)",
+      "Bash(mkfs:*)",
+      "Bash(chown:*)",
+      "Bash(chmod -R:*)",
+
+      "Edit(legacy/**)",
+      "Write(legacy/**)",
+      "Edit(.git/**)",
+      "Write(.git/**)",
+      "Edit(/etc/**)",
+      "Write(/etc/**)",
+      "Edit(~/.ssh/**)",
+      "Write(~/.ssh/**)"
+    ]
+  },
+
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/check_path.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/check_bash.sh"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/end_summary.sh"
+          }
+        ]
+      }
+    ]
+  }
+}

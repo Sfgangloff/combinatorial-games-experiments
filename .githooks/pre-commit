@@ -1,0 +1,46 @@
+#!/bin/bash
+# pre-commit: reject staged files that should never be committed, and
+# run lightweight invariant checks on touched code. Activate this hook
+# tree once after cloning:
+#
+#     git config core.hooksPath .githooks
+#
+# (or run scripts/setup_hooks.sh)
+
+set -e
+
+# 1. Reject forbidden staged paths.
+BAD_STAGED="$(git diff --cached --name-only -z | tr '\0' '\n' | \
+    grep -E '^(harness/results/|legacy/|\.venv/|__pycache__/|.*\.pyc$|.*/\.DS_Store$|\.DS_Store$)' || true)"
+if [ -n "$BAD_STAGED" ]; then
+    echo "pre-commit: refusing to commit files in protected/ignored paths:" >&2
+    printf '  %s\n' $BAD_STAGED >&2
+    echo "Unstage with: git restore --staged <file>" >&2
+    exit 1
+fi
+
+# 2. If core.generator changed, run its selftest.
+if git diff --cached --name-only | grep -q '^core/generator\.py$'; then
+    if [ -x .venv/bin/python ]; then
+        echo "pre-commit: core/generator.py changed -> running selftest..."
+        if ! .venv/bin/python -m core.generator --selftest >/dev/null 2>&1; then
+            echo "pre-commit: core.generator selftest FAILED. Fix before committing." >&2
+            exit 1
+        fi
+    else
+        echo "pre-commit: WARN .venv/bin/python missing, skipping selftest." >&2
+    fi
+fi
+
+# 3. If any harness/core/servers python changed, refuse if it has obvious syntax errors.
+PY_STAGED="$(git diff --cached --name-only -z | tr '\0' '\n' | grep -E '^(harness|core|servers)/.*\.py$' || true)"
+if [ -n "$PY_STAGED" ] && [ -x .venv/bin/python ]; then
+    for f in $PY_STAGED; do
+        if [ -f "$f" ] && ! .venv/bin/python -c "import ast,sys; ast.parse(open('$f').read())" 2>/dev/null; then
+            echo "pre-commit: $f has a syntax error." >&2
+            exit 1
+        fi
+    done
+fi
+
+exit 0
