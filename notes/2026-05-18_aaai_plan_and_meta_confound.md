@@ -142,6 +142,68 @@ puzzle).
   clean-bail design: a completed trial would likely cost $25–40+. The
   $3–4 prediction was wrong because it was based on bail-pathway
   behavior the nudge explicitly suppresses.
+- **W10 2026-05-21** ($5.30, 22.7 min): first Phase-2 window.
+  gen_7x7_s1_00 coarse n=1 ($2.84, 39 calls) + medium n=1 ($2.46,
+  49 calls). Both solved. Medium cheaper than coarse — opposite
+  ordering from tier-2.
+- **W11 2026-05-21** ($5.34, 26.0 min): gen_7x7_s1_00 medium n=2
+  ($3.71, 67 calls) + coarse n=2 ($1.63, 16 calls). High variance
+  (coarse went from 39 calls down to 16).
+- **W12 2026-05-21** ($0.02, 0.2 min, NOT counted): immediate
+  rate-limit abort on trial start. State unchanged.
+- **W13 2026-05-22** ($3.64, 16.9 min): gen_7x7_s1_00 medium n=3
+  ($1.90, 21 calls) + coarse n=3 ($1.74, 33 calls). Medium and coarse
+  both closed at n=3.
+- **W14 2026-05-22** ($4.25, 17.6 min): gen_7x7_s1_00 fine n=1
+  ($4.25, 81 calls).
+- **W15 2026-05-22** ($3.77, 13.7 min): gen_7x7_s1_00 fine n=2
+  ($3.77, 130 calls).
+- **W16 2026-05-22** ($3.58, 17.5 min): gen_7x7_s1_00 fine n=3
+  ($1.61, 35 calls — huge call-count variance: fine ran 35/81/130)
+  + none n=1 ($1.97, 2 calls).
+- **W17 2026-05-22** ($1.32, 8.6 min, NOT counted): rate-limit abort
+  on none trial start. State unchanged.
+
+## Phase-2 partial verdict (gen_7x7_s1_00, tier-3, 2026-05-22)
+
+10 of 12 trials done. Remaining: 2 none trials.
+
+| toolset | n | cost μ ± σ | calls μ ± σ |
+| ---     | - | ---        | ---         |
+| none    | 1 | $1.97      | 2           |
+| fine    | 3 | $3.21 ± 1.41 | 82.0 ± 47.5 |
+| medium  | 3 | $2.69 ± 0.93 | 45.7 ± 23.2 |
+| coarse  | 3 | $2.07 ± 0.67 | 29.3 ± 11.9 |
+
+**Cost ratios vs coarse (the tier-2 winner): ALL OVERLAP at 1σ.** The
+strong tier-2 granularity signal (ratios up to 1.83× separated)
+**collapses at tier-3**. This is the opposite of the G-CD model's
+P3 prediction.
+
+**Reframed headline (non-monotonic / Goldilocks):**
+- tier-1 (puzzle_001, easy): ratios collapse, `fine` is the outlier
+  (uniquely expensive, +28% vs coarse)
+- tier-2 (puzzle_002, medium-hard): ratios diverge, `coarse` wins
+  (1.83× cheaper than none, 1.72× cheaper than fine, all separated)
+- tier-3 (gen_7x7_s1_00, hard): ratios collapse again, all toolsets
+  within $0.62 of each other
+
+The granularity benefit has a **sweet spot**: tools help at medium
+difficulty but become irrelevant at both extremes. This is a stronger,
+more interesting paper than the linear "more tools = cheaper" story —
+and it's empirically what the data shows.
+
+Caveats: gen_7x7_s1_00 may simply be cost-cheaper than puzzle_002
+despite the formal tier-3 grading (search_nodes=4547 but sparse clues
+may make in-head reasoning tractable). The n=1 none cell at $1.97 is
+the most fragile claim; closing it to n=3 may shift the picture.
+
+Cumulative session subscription burn:
+- Counted (good trials): W6 $5.31, W7 $3.67, W10 $5.30, W11 $5.34,
+  W13 $3.64, W14 $4.25, W15 $3.77, W16 $3.58 = **$34.86**
+- Wasted (limit aborts): W9 $18.61, W12 $0.02, W17 $1.32 = **$19.95**
+- Total quota burn: **$54.81** for 10 counted trials (~$3.49/trial
+  effective including overhead).
 
 ## Meta axis: dropped (2026-05-21)
 

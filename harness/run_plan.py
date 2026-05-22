@@ -54,11 +54,11 @@ _COST_TABLE: dict[tuple[str, str], float] = {
     ("puzzle_002", "none"): 4.75, ("puzzle_002", "fine"): 4.45,
     ("puzzle_002", "medium"): 3.29, ("puzzle_002", "coarse"): 2.59,
     ("puzzle_002", "scratchpad"): 3.67,
-    # Phase-2 generated frontier puzzles. Initial guesses extrapolated
-    # from puzzle_002 (tier-3 by formal grading is harder than puzzle_002
-    # which engine plateaus on at tier-3); revise after first window.
-    ("gen_7x7_s1_00", "none"): 6.50, ("gen_7x7_s1_00", "fine"): 5.50,
-    ("gen_7x7_s1_00", "medium"): 4.00, ("gen_7x7_s1_00", "coarse"): 3.25,
+    # Phase-2 generated frontier puzzles. Revised after W10 2026-05-21
+    # (coarse measured $2.84 vs predicted $3.25; medium $2.46 vs $4.00;
+    # interesting: medium cheaper than coarse here, opposite of tier-2).
+    ("gen_7x7_s1_00", "none"): 5.50, ("gen_7x7_s1_00", "fine"): 5.00,
+    ("gen_7x7_s1_00", "medium"): 2.50, ("gen_7x7_s1_00", "coarse"): 2.90,
 }
 _DEFAULT_COST = 5.00
 

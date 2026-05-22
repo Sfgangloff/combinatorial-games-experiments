@@ -9,7 +9,13 @@ an agent's cost-to-solve and solve-rate. The directory name
 
 Slitherlink rules: `rules.md`. Project context for Claude Code:
 `CLAUDE.md`. Research plan, dated experiment notes, and lit review
-live under `notes/`.
+live under `notes/`. Current planning docs (read in order):
+
+- `notes/2026-05-18_aaai_plan_and_meta_confound.md` — Phase-1 gate
+  verdict + meta-axis dropped.
+- `notes/2026-05-21_phase2_design.md` — Phase-2 sweep design +
+  G-CD predictive cost model.
+- `notes/2026-05-21_paper_outline.md` — section plan + figure list.
 
 ## Tool granularities under comparison
 
