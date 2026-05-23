@@ -28,9 +28,12 @@ case "$CMD" in
         ;;
 esac
 
-# Budget gate: harness.run_plan without --dry-run requires explicit auth.
+# Budget gate: an *actual invocation* of harness.run_plan (i.e. `python -m
+# harness.run_plan ...` or similar) without --dry-run requires explicit auth.
+# We match the python-invocation prefix so the gate doesn't false-positive on
+# commands that merely mention "harness.run_plan" in a commit message or doc.
 case "$CMD" in
-    *"harness.run_plan"*)
+    *"python -m harness.run_plan"*|*"python3 -m harness.run_plan"*)
         case "$CMD" in
             *"--dry-run"*) ;;
             *)
