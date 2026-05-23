@@ -1,8 +1,9 @@
 # Paper outline (mid-tier archival target)
 
-**Date:** 2026-05-21. **Status:** draft outline, populates as Phase-2
-data lands.
-**Predecessors:** [`2026-05-21_phase2_design.md`](2026-05-21_phase2_design.md).
+**Date:** 2026-05-21 (revised 2026-05-23). **Status:** draft outline,
+populates as Phase-2 data lands. Theory section §3 updated for G-CD-v2.
+**Predecessors:** [`2026-05-21_phase2_design.md`](2026-05-21_phase2_design.md),
+[`2026-05-23_gcd_revision_goldilocks.md`](2026-05-23_gcd_revision_goldilocks.md).
 
 ## Working title
 
@@ -56,14 +57,21 @@ descriptively. Our differentiators:
   `notes/related_work.md`
 
 ### 3. The G-CD cost model (1 pp)
+
+See [`2026-05-23_gcd_revision_goldilocks.md`](2026-05-23_gcd_revision_goldilocks.md)
+for the full revision; summary here.
+
 ```
-   C ≈ α · n_calls(G, D) + β · n_reasoning_tokens(G, D)
+   C ≈ γ + α · n_calls(G, D) + β · n_reasoning_tokens(G, D)        (G-CD-v2)
 ```
+- γ = fixed per-trial overhead (model warmup + puzzle ingestion + submit)
 - G = granularity (none / fine / medium / coarse)
 - D = formal difficulty tier (1 / 2 / 3+)
-- Granularity controls the **partition** of work
-- Difficulty controls the **floor**
-- Derive predictions P1–P4
+- Granularity controls the **partition** of the work-volume term W(G, D)
+- Difficulty controls W's floor; γ dominates at low D, W dominates at high D
+- Predictions P1'–P5 (P1', P2', P4 already met; P3' is the Goldilocks
+  re-collapse — observed at n=1 tier-3, needs the remaining 2 `none`
+  trials to confirm quantitatively; P5 = unimodal spread, future work)
 
 ### 4. Experimental design (1 pp)
 - Four toolsets (table)
@@ -76,9 +84,10 @@ descriptively. Our differentiators:
 - 5.1 Phase-1 anchors: puzzle_001 (tier-1, null), puzzle_002 (tier-2,
   coarse/none = 0.55× non-overlapping CIs)
 - 5.2 Phase-2 frontier: gen_7x7_s1_00 (tier-3, ratio TBD)
-- 5.3 G-CD predictions check: P1 (tier-1 ratio ≈ 1) ✓, P2
-  (tier-2 ratio < 1) ✓, P3 (tier-3 ratio ≤ P2 ratio), P4 (calls/cost
-  decoupling)
+- 5.3 G-CD-v2 predictions check: P1' (tier-1 collapse → 1) ✓,
+  P2' (tier-2 divergence, coarse/none = 0.55× separated) ✓,
+  P3' (tier-3 re-collapse) ✓ in shape (n=1 at `none`),
+  P4 (calls/cost decoupling, $2.04/call vs $0.037/call = 55×) ✓
 - Figures: (a) cost-ratio surface across tiers, (b) calls vs. cost
   scatter colored by toolset (the P4 figure — load-bearing surprise),
   (c) wall-time secondary
