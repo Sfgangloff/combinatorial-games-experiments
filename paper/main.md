@@ -19,20 +19,23 @@ Reproducibility: all reported numbers come from
 > vs. one coarse "suggest a move" — is rarely treated as a controlled
 > experimental variable. We study tool-granularity on a Slitherlink
 > constraint-satisfaction testbed where (i) puzzle difficulty is a
-> *computed* property via a tier-1/2/3 formal grader, and (ii)
-> contamination is controlled by procedurally generating frontier
-> instances. We propose **G-CD-v2**, a two-floor cost decomposition
-> that adds a fixed-overhead γ term to the standard work-volume
-> decomposition. The model predicts and the data confirm a
-> **non-monotonic, Goldilocks-shaped** dependence of toolset advantage
-> on formal difficulty: granularity helps at intermediate difficulty
-> (coarse/none cost ratio = 0.55× at tier-2, separated 1σ) but the
-> advantage collapses at *both* low difficulty (overhead-dominated,
-> ratios → 1) and high difficulty (search-depth-dominated, ratios →
-> 1). We also report a sharp **calls/cost decoupling**: a `fine`
-> trial runs ≈ 50× more tool calls than a `none` trial for
-> statistically indistinguishable cost, because per-call cost is
-> dominated by reasoning-token context, not by call count.
+> *computed* property — the formal grader returns a coarse tier
+> classification and a search-node count, and we use the latter as
+> a continuous difficulty axis — and (ii) contamination is controlled
+> by procedurally generating frontier instances. We propose
+> **G-CD-v2**, a two-floor cost decomposition that adds a
+> fixed-overhead γ term to the standard work-volume decomposition.
+> The model predicts and the data confirm a **non-monotonic,
+> Goldilocks-shaped** dependence of toolset advantage on formal
+> difficulty: granularity helps at intermediate complexity
+> (coarse/none cost ratio = 0.55× at 501 search nodes, separated 1σ)
+> but the advantage collapses at *both* low complexity
+> (overhead-dominated, ratios → 1 at 96 nodes) and high complexity
+> (search-depth-dominated, ratios → 1 at 4547 nodes). We also report
+> a sharp **calls/cost decoupling**: a `fine` trial runs ≈ 50× more
+> tool calls than a `none` trial for statistically indistinguishable
+> cost, because per-call cost is dominated by reasoning-token
+> context, not by call count.
 
 ## 1. Introduction
 
@@ -57,36 +60,41 @@ We share the high-level question (does granularity matter?) but
 attempt three things their setting does not afford:
 
 1. **A formal-difficulty CSP testbed.** Slitherlink puzzles admit a
-   computed tier-1/2/3 difficulty grader (propagation only / + one-ply
-   lookahead / search-required) implemented in `core.generator.grade`.
-   Difficulty is a property of the puzzle, not a human label.
+   computed difficulty grader (`core.generator.grade`) returning both
+   a coarse tier classification (propagation only / + one-ply
+   lookahead / search-required) and a continuous **search-node count**
+   from a backtracking solver. We use search-node count as the
+   continuous difficulty axis. Difficulty is a property of the puzzle,
+   not a human label.
 2. **A predictive cost model, G-CD-v2.** We propose a two-floor
    decomposition of API cost into a fixed overhead γ and a
    work-volume term `W(G, D)` partitioned by granularity `G` and
    difficulty `D` (§3). The model makes four falsifiable predictions
    P1'–P4 and forbids the simpler monotone "more tools = lower cost"
    alternative.
-3. **Contamination control by construction.** The frontier tier-3
-   puzzle in this study is procedurally generated with a fixed seed
-   and a uniqueness verifier; it did not exist before its generation
-   date.
+3. **Contamination control by construction.** The high-complexity
+   frontier puzzle in this study is procedurally generated with a
+   fixed seed and a uniqueness verifier; it did not exist before its
+   generation date.
 
 The data confirm a **non-monotonic, Goldilocks-shaped** dependence of
 toolset advantage on formal difficulty: a coarse-granularity toolset
-roughly halves the API bill at tier-2 (coarse/none cost ratio = 0.55×,
-non-overlapping 1σ CIs) but the advantage *collapses* at both tier-1
-(overhead-dominated, ratios → 1) and tier-3 (search-depth-dominated,
-ratios → 1). A simpler monotone model — the same paper's pre-committed
-G-CD-v1 — predicted strictly shrinking ratios with difficulty and is
-**falsified** by the tier-3 data; we report both verdicts side by side
-(§5).
+roughly halves the API bill at mid-complexity (coarse/none cost ratio
+= 0.55× at 501 search nodes, non-overlapping 1σ CIs) but the
+advantage *collapses* at both low complexity (96 nodes,
+overhead-dominated, ratios → 1) and high complexity (4547 nodes,
+search-depth-dominated, ratios → 1). A simpler monotone model — the
+same paper's pre-committed G-CD-v1 — predicted strictly shrinking
+ratios with difficulty and is **falsified** by the high-complexity
+data; we report both verdicts side by side (§5).
 
 A second, possibly more surprising finding survives the model
 revision and is what we view as the **load-bearing observation** of
-the paper: tool-call count does not predict cost. At tier-2, a `fine`
-trial issues 121 tool calls per puzzle for $4.45 while a `none` trial
-issues 2.3 calls per puzzle for $4.75 — *the same cost, 50× the
-calls*. Per-call cost varies by 55× across granularities (Table 3).
+the paper: tool-call count does not predict cost. At mid-complexity,
+a `fine` trial issues 121 tool calls per puzzle for $4.45 while a
+`none` trial issues 2.3 calls per puzzle for $4.75 — *the same cost,
+50× the calls*. Per-call cost varies by 55× across granularities
+(Table 3).
 The granularity dial is therefore best understood as *redirecting*
 reasoning between in-context deliberation and compact tool
 invocations, not as adding or removing book-keeping calls. We
@@ -96,8 +104,9 @@ design in §7.
 ### Contributions
 
 - A **formal-difficulty CSP testbed** (Slitherlink with a
-  propagation/lookahead/search tier grader) and a procedurally
-  generated, uniqueness-verified, contamination-controlled tier-3
+  propagation/lookahead/search tier grader plus a search-node count
+  used as a continuous complexity axis) and a procedurally generated,
+  uniqueness-verified, contamination-controlled high-complexity
   frontier puzzle.
 - A **two-floor predictive cost model G-CD-v2** that predicts the
   observed Goldilocks shape from a minimal mechanism (fixed
@@ -185,7 +194,7 @@ connectivity puzzles, but holds the toolset fixed. Eidoku [Miya,
 Wattenhofer [2025] relate reasoning effort to formal problem
 complexity in non-agent LLM settings. Berthier's earlier work on
 pattern-based constraint satisfaction [Berthier, 2013] gives the
-deductive vocabulary that our tier-1/2 propagation/lookahead grader
+deductive vocabulary that our propagation/lookahead tier grader
 inherits. None of these vary tool granularity.
 
 ### 2.6 Positioning
@@ -208,9 +217,11 @@ model, and pricing schedule, the API cost of a single solved trial is
 ```
 
 where `G` denotes toolset granularity (the four discrete settings of
-Section 4), `D` denotes formal puzzle difficulty (tier-1/2/3 by the
-Section-4 grader), and γ, α, β are pricing-determined non-negative
-constants. The three terms separate cleanly:
+Section 4), `D` denotes formal puzzle difficulty (we take
+`D = search_nodes`, the search-node count returned by the Section-4
+grader, used as a continuous variable on a log scale), and γ, α, β
+are pricing-determined non-negative constants. The three terms
+separate cleanly:
 
 - **γ** is the **fixed per-trial overhead** — model warm-up, puzzle
   ingestion at trial start, the final submit/verify exchange. It is
@@ -249,37 +260,42 @@ to the mean `W`. This is a **single-peaked**, non-monotonic prediction.
 
 ### Predictions
 
-We pre-register the following four primary predictions, tested in §5.
-A fifth, P5, is left as appendix / future work because it requires a
-tier-2.5 puzzle not in the current corpus.
+We pre-register the following four primary predictions, tested in §5
+against three anchor puzzles spanning a 47× range of search complexity
+(96, 501, 4547 search nodes). A fifth prediction P5 (unimodality of
+the toolset-spread function in `D`) is left as appendix / future work
+because it requires an additional puzzle inside the
+501–4547-node band.
 
-- **P1' — Low-difficulty collapse.** At tier-1, all toolset
-  cost ratios C(G, 1) / C(none, 1) lie within 1σ of 1.0.
-- **P2' — Mid-difficulty divergence.** At tier-2, there exists at
-  least one granularity G with cost ratio strictly less than 1 to
-  `none`, with non-overlapping 1σ confidence intervals.
-- **P3' — High-difficulty re-collapse.** At tier-3, all toolset cost
-  ratios C(G, 3) / C(none, 3) again lie within 1σ of 1.0 (mirroring
-  the tier-1 collapse). *This prediction is the Goldilocks claim and
-  is what distinguishes G-CD-v2 from a simpler monotone "more tools
-  = lower cost" model.*
-- **P4 — Calls/cost decoupling.** Within a tier, the per-call cost
-  C/n_calls varies by more than 10× across granularities, despite
-  cost itself varying by less than 2×. Equivalently, α ≪ β under
-  current Claude pricing.
+- **P1' — Low-complexity collapse.** At low `D` (puzzle_001,
+  ≈ 96 nodes), all toolset cost ratios C(G, D) / C(none, D) lie
+  within 1σ of 1.0.
+- **P2' — Mid-complexity divergence.** At mid `D` (puzzle_002,
+  ≈ 501 nodes), there exists at least one granularity G with cost
+  ratio strictly less than 1 to `none`, with non-overlapping 1σ CIs.
+- **P3' — High-complexity re-collapse.** At high `D` (gen_7x7_s1_00,
+  ≈ 4547 nodes), all toolset cost ratios again lie within 1σ of
+  1.0 (mirroring the low-complexity collapse). *This prediction is
+  the Goldilocks claim and is what distinguishes G-CD-v2 from a
+  simpler monotone "more tools = lower cost" model.*
+- **P4 — Calls/cost decoupling.** Within a fixed `D`, the per-call
+  cost C/n_calls varies by more than 10× across granularities,
+  despite cost itself varying by less than 2×. Equivalently, α ≪ β
+  under current Claude pricing.
 
 ### Relation to a discarded v1 model
 
 An earlier monotone variant of the model (G-CD-v1, recorded in
 [`notes/2026-05-21_phase2_design.md`](../notes/2026-05-21_phase2_design.md))
 predicted a **strictly shrinking** coarse/none ratio with increasing
-difficulty (`P3`-monotone: tier-3 ratio ≤ tier-2 ratio with separated
-CIs). That prediction was pre-committed before Phase-2 data and is
-**falsified** by the data in §5 (tier-3 ratio = 1.00× vs tier-2 =
-0.55×). G-CD-v2 adds the γ floor explicitly, which is the minimal
-modification consistent with both the existing data and elementary
-mechanism: every trial pays an overhead regardless of `G` or `D`.
-We report both verdicts in §5 for reviewer-defensible framing.
+difficulty (`P3`-monotone: high-`D` ratio ≤ mid-`D` ratio with
+separated CIs). That prediction was pre-committed before the
+high-complexity data and is **falsified** by the data in §5
+(high-`D` ratio = 1.00× vs mid-`D` 0.55×). G-CD-v2 adds the γ floor
+explicitly, which is the minimal modification consistent with both
+the existing data and elementary mechanism: every trial pays an
+overhead regardless of `G` or `D`. We report both verdicts in §5 for
+reviewer-defensible framing.
 
 ## 4. Experimental design
 
@@ -289,12 +305,11 @@ Slitherlink is a loop-construction CSP on an `n × m` grid of cells.
 Each cell may be empty or contain a clue digit in `{0, 1, 2, 3}`; the
 goal is to draw a single non-self-intersecting closed loop along grid
 edges such that the number of loop edges adjacent to each clue cell
-equals that clue. Solving is decidable by depth-bounded constraint
-propagation plus search; deciding has worst-case exponential time
-but Slitherlink belongs to NL ∩ TC⁰ for many natural sub-families.
-The puzzle has a verifiable binary outcome (a candidate solution is
-correct iff a single closed loop satisfies every clue), eliminating
-LLM-judge artifacts.
+equals that clue. Slitherlink is NP-complete in the size of the grid
+[Yato & Seta, 2003] but tractable for the small instances used here
+(5×5 and 7×7). The puzzle has a verifiable binary outcome (a
+candidate solution is correct iff a single closed loop satisfies
+every clue), eliminating LLM-judge artifacts.
 
 ### 4.2 Toolsets (the granularity dial)
 
@@ -308,10 +323,10 @@ two judge tools.
 
 | Granularity `G` | Tool count | Examples | Engine work performed by tools |
 | --- | --- | --- | --- |
-| **none**   | 2 (judge only) | `get_puzzle`, `submit_solution` | None — pure-reasoning baseline. |
-| **fine**   | 21 | `get_edge`, `set_edge`, `count_edges_at_dot`, … | State tracking only; the model performs all inference. |
-| **medium** | 13 | `apply_edge` (with propagation), `forced_moves`, `endpoints`, … | One-step local inference (clue propagation, dot-endpoint analysis). |
-| **coarse** | 11 | `suggest_next_move`, `apply_move` | Propagation + one-ply lookahead — the tool proposes the next forced edge. |
+| **none**   | 3 (judge only)  | `list_puzzles`, `get_puzzle`, `submit_solution` | None — pure-reasoning baseline. |
+| **fine**   | 20 (3 + 17)     | `get_edge`, `set_edge`, `count_edges_at_dot`, … | State tracking only; the model performs all inference. |
+| **medium** | 12 (3 + 9)      | `apply_edge` (with propagation), `forced_moves`, `endpoints`, … | One-step local inference (clue propagation, dot-endpoint analysis). |
+| **coarse** | 9 (3 + 6)       | `suggest_next_move`, `apply_move` | Propagation + one-ply lookahead — the tool proposes the next forced edge. |
 
 The four toolsets span a known spectrum from pure-LLM reasoning to a
 near-complete external solver, while the *task* is held fixed. A
@@ -324,36 +339,44 @@ results are reported in an appendix.
 ### 4.3 Difficulty grader (the difficulty dial)
 
 Formal difficulty is a computed property of each puzzle, not a human
-label. The grader (`core.generator.grade`) returns
+label. The grader (`core.generator.grade`) returns a pair
 `(tier, search_nodes)`:
 
 - **Tier 1.** Solvable by clue-driven propagation alone (no
-  assumption, no lookahead). `core.propagation.propagate_only`
-  reaches a complete solution.
+  assumption, no lookahead). `core.propagation.propagate` reaches a
+  complete solution.
 - **Tier 2.** Solvable by propagation + one-ply lookahead — at each
   ambiguous edge, try both assignments; if exactly one is consistent,
   apply it; iterate.
 - **Tier 3.** Requires depth-≥ 2 search. `search_nodes` is the size
-  of the backtracking tree (verified by `count_solutions` with
-  early-exit at 2 solutions, which also verifies uniqueness).
+  of the backtracking tree returned by `count_solutions` with
+  early-exit at 2 solutions (which also verifies uniqueness).
 
-The three anchor puzzles span the three tiers:
+The three anchor puzzles all fall into the formal tier-3 bucket
+(they all require search). They differ in **search complexity** by a
+factor of 47×, and we use that continuous axis throughout §5:
 
-| Puzzle | Size | Tier | Source | n_clues | search_nodes |
+| Puzzle | Size | Formal tier | Source | n_clues | search_nodes |
 | --- | --- | --- | --- | --- | --- |
-| puzzle_001 | 5×5 | 1 | puzzle-loop.com (Phase-1 anchor) | 13 | 1 |
-| puzzle_002 | 7×7 | 2 | puzzle-loop.com Puzzle ID 25,425 | 24 | 1 |
-| gen_7x7_s1_00 | 7×7 | 3 | generator, seed 1 | 13 | 4547 |
+| puzzle_001    | 5×5 | 3 | puzzle-loop.com (Phase-1 anchor) | 12 | **96** |
+| puzzle_002    | 7×7 | 3 | puzzle-loop.com Puzzle ID 25,425 | 23 | **501** |
+| gen_7x7_s1_00 | 7×7 | 3 | generator, seed 1               | 13 | **4547** |
+
+In this sense the present study reports a **within-tier-3 cost-ratio
+surface across a 47× span of search complexity**. The original
+grader's tier-1/tier-2 buckets are not exercised by the puzzles in
+this corpus; generating shallower instances for completeness is left
+as future work (§6).
 
 ### 4.4 Contamination control
 
-Tier-1 and tier-2 puzzles are taken from puzzle-loop.com, a public
-archive. While the resulting solutions are not expected to be in any
-model's pretraining corpus *as token sequences*, the puzzle clues
-themselves might be. We use these puzzles only as **anchor points**
-that the formal grader confirms occupy the expected tiers.
+The low- and mid-complexity anchor puzzles are taken from
+puzzle-loop.com, a public archive. While the resulting solutions are
+not expected to be in any model's pretraining corpus *as token
+sequences*, the puzzle clues themselves might be. We use these
+puzzles only as **anchor points** in the complexity-vs-cost surface.
 
-The tier-3 frontier puzzle `gen_7x7_s1_00` is **procedurally
+The high-complexity frontier puzzle `gen_7x7_s1_00` is **procedurally
 generated** by `core.generator.generate_one` with a fixed seed
 (`s = 1`). Generation runs a random region growth followed by
 `reduce_to_unique`, dropping clues in random order while
@@ -413,12 +436,13 @@ aggregates. Rate-limit-aborted trials are excluded by construction
 (the run-plan harness writes them to the result store but the
 analyzer's `outcome.solved` filter discards them).
 
-### 5.1 Per-tier results
+### 5.1 Per-puzzle results
 
-Tables 2a–c summarize the three anchor puzzles. Cost is in USD and
-calls is the per-trial count of MCP tool invocations.
+Tables 2a–c summarize the three anchor puzzles, ordered by search
+complexity. Cost is in USD and calls is the per-trial count of MCP
+tool invocations.
 
-**Table 2a — Tier-1 (puzzle_001, 5×5 easy):**
+**Table 2a — Low complexity (puzzle_001, 5×5, 96 search nodes):**
 
 | toolset | n | cost μ ± σ | calls μ ± σ |
 | ---     | - | ---        | ---         |
@@ -430,7 +454,7 @@ calls is the per-trial count of MCP tool invocations.
 All three non-`none` toolsets are within 1σ of `none` in cost
 (ratios 0.71–1.49×); no pair has separated 1σ confidence intervals.
 
-**Table 2b — Tier-2 (puzzle_002, 7×7 hard):**
+**Table 2b — Mid complexity (puzzle_002, 7×7, 501 search nodes):**
 
 | toolset | n | cost μ ± σ | calls μ ± σ |
 | ---     | - | ---        | ---         |
@@ -443,8 +467,8 @@ All three non-`none` toolsets are within 1σ of `none` in cost
 5.69]$; coarse $[2.10, 3.09]$; gap $\$0.72$). This is the divergence
 regime predicted by P2'.
 
-**Table 2c — Tier-3 (gen_7x7_s1_00, 7×7 generated, tier-3 by formal
-grading, n_clues = 13, search_nodes = 4547):**
+**Table 2c — High complexity (gen_7x7_s1_00, 7×7 generated, 4547
+search nodes, 13 clues):**
 
 | toolset | n | cost μ ± σ | calls μ ± σ |
 | ---     | - | ---        | ---         |
@@ -454,20 +478,22 @@ grading, n_clues = 13, search_nodes = 4547):**
 | coarse  | 3 | $2.07 ± $0.67 | 29.3 ± 11.9 |
 
 All four toolsets are within 1σ of `none`; the spread has collapsed
-relative to tier-2 (coarse/none ratio 1.00×, fine/none 1.55×, medium
-1.30×). Notably the absolute cost level at tier-3 is *lower* than at
-tier-2 for every toolset, despite the formal tier being higher — a
-caveat we return to in §6.
+relative to mid-complexity (coarse/none 1.00×, fine/none 1.55×,
+medium 1.30×). Notably the absolute cost level at high complexity is
+*lower* than at mid complexity for every toolset, despite the
+search-node count being almost 10× larger — a caveat we return to in
+§6.
 
 ### 5.2 The cost-ratio surface (Figure F1b)
 
 Figure F1b plots cost ratios C(G, D) / C(none, D) for each toolset
-against tier on the x-axis. The surface is **V-shaped**: all three
-non-`none` toolsets exhibit a trough at tier-2 and return toward (or
-above) 1.0 at tiers 1 and 3. Absolute costs (Figure F1) show the same
-shape with the bump rather than the trough: every toolset is most
-expensive at tier-2 in absolute terms, and the *spread* between
-toolsets is maximal at that bump.
+against `D = search_nodes` on a log-scaled x-axis. The surface is
+**V-shaped**: all three non-`none` toolsets exhibit a trough at
+mid complexity (≈ 501 nodes) and return toward (or above) 1.0 at
+both endpoints (96 and 4547 nodes). Absolute costs (Figure F1) show
+the same shape with a bump rather than a trough: every toolset is
+most expensive at mid complexity in absolute terms, and the *spread*
+between toolsets is maximal at that bump.
 
 ### 5.3 Prediction verdicts
 
@@ -476,11 +502,11 @@ and the revised G-CD-v2 prediction P3', for transparency.
 
 | Prediction | Statement | Verdict |
 | --- | --- | --- |
-| **P1'** | Tier-1 ratios collapse to ≈ 1 | **PASS** (3 / 3 toolsets 1σ-overlap with `none`) |
-| **P2'** | Tier-2 coarse/none < 1, separated 1σ | **PASS** (ratio 0.55×, gap $0.72) |
-| **P3 (v1)** | Tier-3 coarse/none ≤ tier-2 ratio with separated 1σ — *pre-committed monotone* | **FAIL** (tier-3 ratio 1.00× > tier-2 0.55×) |
-| **P3' (v2)** | Tier-3 ratios re-collapse to ≈ 1 (Goldilocks) | **PASS** (3 / 3 toolsets 1σ-overlap with `none`) |
-| **P4** | Per-call cost varies > 10× across granularities at fixed tier | **PASS** (see §5.4) |
+| **P1'** | Low-`D` ratios collapse to ≈ 1 | **PASS** (3 / 3 toolsets 1σ-overlap with `none`) |
+| **P2'** | Mid-`D` coarse/none < 1, separated 1σ | **PASS** (ratio 0.55×, gap $0.72) |
+| **P3 (v1)** | High-`D` coarse/none ≤ mid-`D` ratio with separated 1σ — *pre-committed monotone* | **FAIL** (high-`D` ratio 1.00× > mid-`D` 0.55×) |
+| **P3' (v2)** | High-`D` ratios re-collapse to ≈ 1 (Goldilocks) | **PASS** (3 / 3 toolsets 1σ-overlap with `none`) |
+| **P4** | Per-call cost varies > 10× across granularities at fixed `D` | **PASS** (see §5.4) |
 
 The pre-committed monotone prediction P3 is on record as failing. The
 revised model G-CD-v2, motivated by adding the γ floor as the minimal
@@ -489,8 +515,8 @@ n = 3 closure of Phase-2 minimum-viable.
 
 ### 5.4 Calls–cost decoupling (P4 — load-bearing finding)
 
-Within tier-2, where the cost differences are largest, per-call cost
-varies by **55×** across granularities:
+At mid complexity (puzzle_002), where the cost differences are
+largest, per-call cost varies by **55×** across granularities:
 
 | toolset | calls μ | cost μ | cost / call |
 | ---     | ---     | ---    | ---         |
@@ -521,12 +547,12 @@ of magnitude.
 The V-shape (P3') and the calls–cost decoupling (P4) compose into a
 single observation: **tool-set granularity reshapes how an LLM agent
 spends a roughly fixed reasoning budget, and the reshaping is
-cost-meaningful only at intermediate problem difficulty.** At easy
-problems the fixed-overhead γ dominates and no reshaping matters. At
-hard problems the work-volume `W` is so large for every toolset (the
-search-depth floor) that granularity-specific savings become a small
-fraction of total cost. In the middle, the toolset choice can roughly
-halve the API bill.
+cost-meaningful only at intermediate search complexity.** At low
+search complexity the fixed-overhead γ dominates and no reshaping
+matters. At high search complexity the work-volume `W` is so large
+for every toolset (the search-depth floor) that
+granularity-specific savings become a small fraction of total cost.
+In the middle, the toolset choice can roughly halve the API bill.
 
 ## 6. Limitations and future work
 
@@ -539,33 +565,40 @@ disappear under a different model–toolset pair. A second model on
 even a small subset (one tier, two toolsets, n = 3) would be a
 6-trial / ≈ $6 add — promising but out of budget for this study.
 
-**One puzzle per tier.** Each tier in §5 is anchored by a single
-puzzle. The V-shape is therefore a statement about a (G, D, puzzle)
-surface collapsed onto (G, D). A second tier-3 puzzle at a different
-grid size would strengthen the high-difficulty re-collapse claim;
-attempts to generate 9×9 and 10×10 tier-3 puzzles with the same
-`core.generator` were killed after ≈ 14 minutes of CPU each with no
-output, indicating the generator does not scale beyond 7×7 at tier-3
-in its current form. Improving generator throughput is itself a
-research target.
+**One puzzle per complexity anchor.** Each of the three `D` values
+in §5 is anchored by a single puzzle. The V-shape is therefore a
+statement about a (G, D, puzzle) surface collapsed onto (G, D). The
+present corpus also samples only the formal tier-3 portion of the
+grader's range (all three anchor puzzles return tier = 3): a true
+tier-1 puzzle (solvable by propagation alone) and a true tier-2
+puzzle (solvable by + one-ply lookahead) would extend the
+complexity axis downward by orders of magnitude. We have not
+generated such puzzles inside this study. A second high-complexity
+puzzle at a different grid size would also strengthen the
+high-`D` re-collapse claim; attempts to generate 9×9 and 10×10
+tier-3 puzzles with the same `core.generator` were killed after
+≈ 14 minutes of CPU each with no output, indicating the generator
+does not scale beyond 7×7 at tier-3 in its current form. Improving
+generator throughput is itself a research target.
 
-**gen_7x7_s1_00 absolute cost is low.** The tier-3 generated puzzle's
-mean `none` cost is $2.08, below the *tier-2* puzzle_002's $4.75. The
-formal grader places gen_7x7_s1_00 in tier-3 (search_nodes = 4547),
-but its sparse-clue structure (13 clues / 49 cells, vs. puzzle_002's
-24 / 49) may make the puzzle tractable to in-context reasoning
-despite the high search-node count. The "high-D re-collapse"
-mechanism in G-CD-v2 (P3') is the most plausible explanation for the
-toolset spread collapse, but we cannot rule out a confound in which
-gen_7x7_s1_00 simply happens to be cost-cheap *across all toolsets*.
-A second tier-3 puzzle (above) would discriminate.
+**gen_7x7_s1_00 absolute cost is low.** The high-complexity
+generated puzzle's mean `none` cost is $2.08, below the
+*mid-complexity* puzzle_002's $4.75. The formal grader confirms 4547
+search nodes for gen_7x7_s1_00 vs 501 for puzzle_002, but the former's
+sparse-clue structure (13 clues / 49 cells, vs. puzzle_002's 23 / 49)
+may make the puzzle tractable to in-context reasoning despite the
+higher search-node count. The "high-`D` re-collapse" mechanism in
+G-CD-v2 (P3') is the most plausible explanation for the toolset spread
+collapse, but we cannot rule out a confound in which gen_7x7_s1_00
+simply happens to be cost-cheap *across all toolsets*. A second
+high-complexity puzzle would discriminate.
 
 **P5 (unimodality of the spread surface) untested.** G-CD-v2 implies
 the toolset-spread function σ_G C(G, D) has a single peak in D. The
-present design tests three points and so cannot rule out a multi-modal
-spread. A tier-2.5 puzzle (between puzzle_002 and gen_7x7_s1_00 in
-formal difficulty) would test P5; ≈ $60 of trials and one generator
-run, deferred to future work.
+present design tests three points and so cannot rule out a
+multi-modal spread. A fourth puzzle inside the 501–4547-node band
+would test P5; ≈ $60 of trials and one generator run, deferred to
+future work.
 
 **Meta-tool axis.** A "meta-tools" condition allowing the agent to
 synthesize new tools at runtime is implemented in the codebase but
@@ -585,13 +618,14 @@ the harness. Future work targeting larger campaigns should plan for
 
 LLM tool-set granularity reduces the cost of solving formal CSP tasks,
 but the reduction is **conditional on problem difficulty**: it is
-large at intermediate difficulty (coarse cuts cost roughly in half
-relative to a pure-reasoning baseline), and it collapses at *both*
-ends of the difficulty axis. This Goldilocks shape is predicted by a
-minimal two-floor cost model (G-CD-v2) that distinguishes a fixed
-per-trial overhead γ from a granularity-and-difficulty-dependent
-work-volume term `W`. The pre-committed monotone alternative is
-falsified by the tier-3 data.
+large at intermediate search complexity (coarse cuts cost roughly in
+half relative to a pure-reasoning baseline), and it collapses at
+*both* ends of the complexity axis we sample. This Goldilocks shape
+is predicted by a minimal two-floor cost model (G-CD-v2) that
+distinguishes a fixed per-trial overhead γ from a
+granularity-and-difficulty-dependent work-volume term `W`. The
+pre-committed monotone alternative is falsified by the
+high-complexity data.
 
 A second finding survives the model revision and is what we view as
 the most actionable for tool designers: **tool-call count does not
@@ -611,8 +645,8 @@ how few or how many calls they generate.
 
 | ID | Description | Source |
 | --- | --- | --- |
-| F1 | Cost μ ± σ per toolset across tiers | `paper/figures/f1_cost_by_tier.png` |
-| F1b | Cost ratio vs `none` across tiers (V-shape) | `paper/figures/f1b_cost_ratio_by_tier.png` |
+| F1 | Cost μ ± σ per toolset vs log search_nodes | `paper/figures/f1_cost_by_complexity.png` |
+| F1b | Cost ratio vs `none` across complexity (V-shape) | `paper/figures/f1b_cost_ratio_by_complexity.png` |
 | F2 | Calls vs cost scatter (P4 decoupling) | `paper/figures/f2_calls_vs_cost.png` |
 | F3 | Difficulty-grader algorithm box | `core/generator.grade` (TBD render) |
 | T1 | Toolset definitions + tool counts | static; transcribed from `servers/` |
