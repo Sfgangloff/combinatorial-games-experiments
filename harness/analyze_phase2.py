@@ -171,10 +171,10 @@ def gcd_predictions(data: dict[int, dict[str, dict]]) -> None:
           f"{'PASS' if p2_pass else 'FAIL'}  "
           f"(ratio={r2:.2f}×, separated={sep2})")
 
-    # P3: tier-3 coarse/none ratio ≤ tier-2 coarse/none ratio.
+    # P3 (G-CD-v1, monotone): tier-3 coarse/none ratio ≤ tier-2 coarse/none ratio.
     r3, sep3 = ratio(3, "coarse", "none")
     p3_pass = not math.isnan(r2) and not math.isnan(r3) and r3 <= r2 and sep3
-    print(f"P3 (tier-3 coarse/none ≤ tier-2 coarse/none, still separated): "
+    print(f"P3  (G-CD-v1, tier-3 coarse/none ≤ tier-2 coarse/none, separated): "
           f"{'PASS' if p3_pass else 'FAIL'}  "
           f"(tier-2 ratio={r2:.2f}×, tier-3 ratio={r3:.2f}×, "
           f"tier-3 separated={sep3})")
@@ -185,6 +185,23 @@ def gcd_predictions(data: dict[int, dict[str, dict]]) -> None:
         elif not sep3:
             print(f"    ↳ P3 partial: ratio direction OK but tier-3 1σ CIs overlap — "
                   f"signal collapses at tier-3 without inverting.")
+
+    # P3' (G-CD-v2, Goldilocks): tier-3 ratios collapse back toward 1
+    # (all toolset 1σ CIs at tier-3 overlap with `none`, mirroring tier-1).
+    t3 = data[3]
+    if t3["none"]["n"] > 0:
+        t3_overlaps = []
+        for ts in TOOLSETS:
+            if ts == "none" or t3[ts]["n"] == 0:
+                continue
+            t3_overlaps.append(_intervals_overlap(
+                t3[ts]["cost_mean"], t3[ts]["cost_sd"],
+                t3["none"]["cost_mean"], t3["none"]["cost_sd"],
+            ))
+        p3prime_pass = all(t3_overlaps) if t3_overlaps else False
+        print(f"P3' (G-CD-v2, tier-3 ratios re-collapse to ≈1): "
+              f"{'PASS' if p3prime_pass else 'FAIL'}  "
+              f"({sum(t3_overlaps)}/{len(t3_overlaps)} toolsets 1σ-overlap with none)")
 
     # P4: calls/cost decoupling — within a tier, does cost scale sub-linearly
     #     with calls across toolsets? Use the tier-2 numbers (most informative).

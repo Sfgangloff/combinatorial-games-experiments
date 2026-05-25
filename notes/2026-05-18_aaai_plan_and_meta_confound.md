@@ -163,30 +163,37 @@ puzzle).
   + none n=1 ($1.97, 2 calls).
 - **W17 2026-05-22** ($1.32, 8.6 min, NOT counted): rate-limit abort
   on none trial start. State unchanged.
+- **W18 2026-05-24** ($4.26, 24.5 min): both remaining tier-3 `none`
+  trials landed in one window. Trial 1: solved, 3 calls, $1.56.
+  Trial 2: solved, 2 calls, $2.70. **gen_7x7_s1_00 all four toolsets
+  at n=3. Phase-2 minimum-viable closed.** none cell: $2.08 ± $0.58
+  (was $1.97 n=1). Coarse/none ratio moved 1.05× → 1.00× (still
+  overlapping 1σ); V-shape held cleanly. P3' (G-CD-v2 re-collapse)
+  PASS at full n=3, 3/3 toolsets overlap with `none` at tier-3.
 
-## Phase-2 partial verdict (gen_7x7_s1_00, tier-3, 2026-05-22)
+## Phase-2 final verdict (gen_7x7_s1_00, tier-3, closed 2026-05-24)
 
-10 of 12 trials done. Remaining: 2 none trials.
+12 of 12 trials done. **Minimum-viable Phase-2 closed.**
 
 | toolset | n | cost μ ± σ | calls μ ± σ |
 | ---     | - | ---        | ---         |
-| none    | 1 | $1.97      | 2           |
+| none    | 3 | $2.08 ± 0.58 | 2.3 ± 0.6 |
 | fine    | 3 | $3.21 ± 1.41 | 82.0 ± 47.5 |
 | medium  | 3 | $2.69 ± 0.93 | 45.7 ± 23.2 |
 | coarse  | 3 | $2.07 ± 0.67 | 29.3 ± 11.9 |
 
-**Cost ratios vs coarse (the tier-2 winner): ALL OVERLAP at 1σ.** The
-strong tier-2 granularity signal (ratios up to 1.83× separated)
-**collapses at tier-3**. This is the opposite of the G-CD model's
-P3 prediction.
+**Cost ratios vs coarse: ALL OVERLAP at 1σ.** The strong tier-2
+granularity signal (ratios up to 1.83× separated) **collapses at
+tier-3** — opposite of the G-CD-v1 P3 prediction, consistent with
+G-CD-v2 P3' (see `2026-05-23_gcd_revision_goldilocks.md`).
 
-**Reframed headline (non-monotonic / Goldilocks):**
+**Reframed headline (non-monotonic / Goldilocks), confirmed at n=3:**
 - tier-1 (puzzle_001, easy): ratios collapse, `fine` is the outlier
   (uniquely expensive, +28% vs coarse)
 - tier-2 (puzzle_002, medium-hard): ratios diverge, `coarse` wins
   (1.83× cheaper than none, 1.72× cheaper than fine, all separated)
 - tier-3 (gen_7x7_s1_00, hard): ratios collapse again, all toolsets
-  within $0.62 of each other
+  within $1.14 of each other; coarse/none = 1.00× exactly at n=3
 
 The granularity benefit has a **sweet spot**: tools help at medium
 difficulty but become irrelevant at both extremes. This is a stronger,
@@ -195,15 +202,18 @@ and it's empirically what the data shows.
 
 Caveats: gen_7x7_s1_00 may simply be cost-cheaper than puzzle_002
 despite the formal tier-3 grading (search_nodes=4547 but sparse clues
-may make in-head reasoning tractable). The n=1 none cell at $1.97 is
-the most fragile claim; closing it to n=3 may shift the picture.
+may make in-head reasoning tractable — none mean cost dropped from
+$4.75 at tier-2 to $2.08 at tier-3 even though formal tier increased).
+A second tier-3 puzzle at a different grid size (P5 unimodality
+test) would discriminate "Goldilocks is real" from "gen_7x7_s1_00
+is anomalously easy". Appendix / future work.
 
-Cumulative session subscription burn:
+Cumulative session subscription burn (Phase 2 minimum-viable):
 - Counted (good trials): W6 $5.31, W7 $3.67, W10 $5.30, W11 $5.34,
-  W13 $3.64, W14 $4.25, W15 $3.77, W16 $3.58 = **$34.86**
+  W13 $3.64, W14 $4.25, W15 $3.77, W16 $3.58, W18 $4.26 = **$39.12**
 - Wasted (limit aborts): W9 $18.61, W12 $0.02, W17 $1.32 = **$19.95**
-- Total quota burn: **$54.81** for 10 counted trials (~$3.49/trial
-  effective including overhead).
+- Total quota burn: **$59.07** for 12 counted trials (~$3.26/trial
+  effective including overhead). Well under the $250 Phase-2 cap.
 
 ## Meta axis: dropped (2026-05-21)
 
@@ -260,18 +270,25 @@ non-overlapping 1σ CIs on coarse/none cost ⇒ descriptive frontier real
   is conditional on hard-enough puzzles, which is itself a useful
   paper finding.
 
-## RESUME HERE (Phase-1 gate is closed)
+## RESUME HERE (Phase-2 minimum-viable closed 2026-05-24)
 
 Critical path (in order):
 
 1. ~~**Fair meta test**~~ — **dropped 2026-05-21** (cost infeasible,
    see "Meta axis: dropped" above). Footnote/appendix only.
-2. **Phase 2 plan**: difficulty-frontier sweep, single model,
-   contamination-controlled, generated via `core.generator` so
-   puzzles are seed-locked and uniqueness-verified. Design the
-   difficulty buckets (tier-1 propagation-only, tier-2 +1-ply,
-   tier-3+ search-required) × 4 toolsets × n=3. ~144 runs as
-   originally scoped, ~$290, ~30 windows ≈ 3–5 weeks disciplined.
-3. Commit the uncommitted scaffolding (`core/generator.py`,
-   `harness/run_plan.py`, the README rewrite, this note) before
-   Phase 2 starts so any later result hashes to a clean tree.
+2. ~~**Phase 2 minimum-viable**~~ — **closed 2026-05-24** (12/12
+   trials on gen_7x7_s1_00, V-shape held at n=3). See "Phase-2
+   final verdict" above.
+3. **Start writing.** Per `2026-05-21_paper_outline.md` triggers,
+   minimum-viable Phase-2 closure is the writing trigger. G-CD-v2
+   theory section drafted in `2026-05-23_gcd_revision_goldilocks.md`.
+   Figures in `paper/figures/`. Reproducible analysis via
+   `python -m harness.analyze_phase2 --figures`.
+
+**Outstanding decisions (write-time):**
+- Target venue: AAAI-27 main (preferred) vs FLAIRS-39 vs workshop.
+  Recommend filing for AAAI-27 first; fall back to FLAIRS-39 if rejected.
+- Stretch tier-3 puzzle (8×8 generator if it lands, or P5 unimodality
+  test at tier-2.5)? Strengthens but isn't blocking.
+- Second-model stretch (Haiku on a subset, ~$6) for the
+  model×granularity interaction figure?
