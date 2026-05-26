@@ -22,3 +22,12 @@ notes/research_plan.md
 .claude/projects/
 .claude/cache/
 .claude/backups/
+
+# LaTeX build artifacts. Track only paper/main.tex, .bib, figures, .pdf
+paper/main.aux
+paper/main.bbl
+paper/main.blg
+paper/main.fdb_latexmk
+paper/main.fls
+paper/main.log
+paper/main.out
