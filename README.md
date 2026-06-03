@@ -1,118 +1,94 @@
-# Slitherlink MCP-tool granularity experiments
+# Slitherlink MCP tool-granularity experiments
 
-A research codebase comparing **tool granularities** for an LLM
-(Claude Code) solving Slitherlink puzzles. The hypothesis is that
-*how* a tool exposes work — many fine primitives vs. a handful of
-named deductions vs. one coarse "suggest a move" — materially affects
-an agent's cost-to-solve and solve-rate. The directory name
-`claude-sudoku-experiments` is historical (Sudoku may return later).
+Experiment code for a study of how **MCP tool-set granularity** affects an
+LLM agent (Claude Code, Opus 4.7) solving Slitherlink puzzles — fine atomic
+primitives vs. named one-step deductions vs. a coarse "suggest a move" tool,
+plus a `scratchpad` variant with engine-level bookkeeping and 1-ply lookahead.
 
-Slitherlink rules: `rules.md`. Project context for Claude Code:
-`CLAUDE.md`. Research plan, dated experiment notes, and lit review
-live under `notes/`. Current planning docs (read in order):
-
-- `notes/2026-05-18_aaai_plan_and_meta_confound.md` — Phase-1 gate
-  verdict + meta-axis dropped.
-- `notes/2026-05-21_phase2_design.md` — Phase-2 sweep design +
-  G-CD predictive cost model.
-- `notes/2026-05-21_paper_outline.md` — section plan + figure list.
+> **The research reasoning lives elsewhere.** Questions, answers, conclusions,
+> and how the project's thinking evolved are maintained as a structured
+> reasoning graph in the **research-compiler** repo, stream
+> **`slitherlink-tool-granularity`**. This repository keeps only the
+> experiment apparatus + data. To read the reasoning:
+> `rc export paper --stream slitherlink-tool-granularity` (or open it in the
+> research-compiler web app). Each experiment below is the node `e-00NN` in
+> that stream.
 
 ## Tool granularities under comparison
 
-Five MCP servers under `servers/`, each exposed to the model by the
-harness one condition at a time. The point isn't to hand Claude a SAT
-solver — it's to vary *where* the model/engine boundary sits and
-measure the effect.
+Five MCP servers under `servers/`, exposed to the model one condition at a time.
 
 | Set         | Tools                                              | Philosophy |
 | ---         | ---                                                | --- |
 | none        | judge tools only (`get_puzzle`, `submit_solution`) | Pure-reasoning baseline. |
-| fine        | ~15 atomic primitives (`get_edge`, `set_edge`, `count_edges_at_dot`, …) | Tools track state; model does all inference. |
-| medium      | ~9 named deductions (`apply_edge` w/ propagation, `forced_moves`, `endpoints`, …) | Tools handle one-step local inference. |
-| coarse      | ~5 tools incl. `suggest_next_move` (propagate + 1-ply lookahead) | Tool does most of the work; control condition. |
-| scratchpad  | medium + frame stack (`assume`/`commit`/`retract`) + `try_both` | Auto-bookkeeping for case-splits + engine-level 1-ply lookahead. |
+| fine        | ~15 atomic primitives (`get_edge`, `set_edge`, …)  | Tools track state; model does all inference. |
+| medium      | ~9 named deductions (`apply_edge`, `forced_moves`, …) | Tools handle one-step local inference. |
+| coarse      | ~5 tools incl. `suggest_next_move` (propagate + 1-ply) | Tool does most of the work; control condition. |
+| scratchpad  | medium + frame stack (`assume`/`commit`/`retract`) + `try_both` | Auto-bookkeeping for case-splits + engine 1-ply lookahead. |
 
-Metrics: solve success, tool-call count, cost (USD), tokens,
-dead-ends/backtracks, wall time.
+Metrics: solve success, tool-call count, cost (USD), tokens, backtracks, wall time.
+
+## Experiment index
+
+Each row is a node in the `slitherlink-tool-granularity` stream. The harness
+writes raw per-trial JSON to `harness/results/` (gitignored).
+
+| Node | Experiment | How to run |
+| --- | --- | --- |
+| `e-0001` | puzzle_001 (5×5 easy) 2×4 baseline matrix (pilot) | `python -m harness.run_matrix` |
+| `e-0002` | puzzle_002 (7×7 hard) 4-toolset pilot | `python -m harness.run_subset` |
+| `e-0003` | puzzle_001 Phase-1 replication, n=3–4 | `python -m harness.run_subset` → `python -m harness.aggregate_phase1` |
+| `e-0004` | puzzle_002 Phase-1 gate replication, n=3 | `python -m harness.run_plan` |
+| `e-0005` | puzzle_004 (15×15) scaling probe | `python -m harness.run_subset` |
+| `e-0006` | scratchpad v1 (frame stack) sweep | `python -m harness.run_subset` (server `slitherlink-scratchpad`) |
+| `e-0007` | scratchpad v2 (`try_both`, 1-ply) sweep | `python -m harness.run_subset` |
+| `e-0008` | puzzle_004 scratchpad meta-on probes | `python -m harness.run_plan` |
+| `e-0009` | gen_7x7_s1_00 Phase-2 frontier, n=3 | `python -m harness.run_plan` → `python -m harness.analyze_phase2` |
+
+Difficulty is a *computed* property: `core.generator.grade` tiers each puzzle
+(1 = propagation, 2 = +1-ply, 3+ = search, with `search_nodes`). Frontier
+puzzles are procedurally generated with seed-locked uniqueness verification
+(`python -m core.generator --selftest`).
 
 ## Layout
 
 ```
-README.md, CLAUDE.md, rules.md         project context
-core/                                  shared engine
-  state.py, parser.py, render.py
-  propagation.py, analysis.py
-  generator.py                         seeded procedural generator
-                                       + solution counter (uniqueness
-                                       verifier) + difficulty tiering
-servers/
-  slitherlink-judge/                   get_puzzle, submit_solution
-  slitherlink-fine/                    ~15 atomic primitives
-  slitherlink-medium/                  ~9 local-deduction tools
-  slitherlink-coarse/                  suggest_next_move + apply_move
-  slitherlink-scratchpad/              medium + frame stack + try_both
-harness/
-  run.py            run one (puzzle x condition) cell
-  run_subset.py     run a subset of toolsets on one puzzle
-  run_matrix.py     run the full N-condition matrix
-  run_plan.py       resumable, window-budget-capped, rate-limit-safe
-                    batch runner; --dry-run shows pending trials
-  conditions.py, prompts.py, aggregate_phase1.py, visualize.py
-tests/                                 smoke tests for core/ and servers
-puzzles/                               test corpus + manifest.json
-notes/                                 dated experiment notes + lit review
-legacy/                                prior file-based batch protocol
-                                       (read-only reference)
+core/        shared engine (state, parser, render, propagation, analysis, generator)
+servers/     the five MCP toolsets (judge / fine / medium / coarse / scratchpad)
+harness/     run.py, run_subset.py, run_matrix.py, run_plan.py (resumable,
+             budget-capped, rate-limit-safe), conditions.py, prompts.py,
+             aggregate_phase1.py, analyze_phase2.py, visualize.py
+puzzles/     test corpus + manifest.json + generated frontier puzzles
+tests/       smoke tests for core/ and servers/
+legacy/      prior file-based batch protocol — FROZEN reference, do not edit
+rules.md, validate_grid.py, pyproject.toml
 ```
 
 ## Running
 
 ```
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -e .
+python3 -m venv .venv && source .venv/bin/activate && pip install -e .
 python -m tests.run_all                # smoke tests
 python -m core.generator --selftest    # generator + uniqueness verifier
-```
 
-Register a server with Claude Code:
-
-```
+# Register a server with Claude Code, e.g.:
 claude mcp add slitherlink-scratchpad -- \
     /absolute/path/to/.venv/bin/python \
     /absolute/path/to/servers/slitherlink-scratchpad/server.py
-```
 
-Drive experiments via the resumable runner (see `harness/run_plan.py`
-for the budget/resume semantics — designed for the 5h-rate-limit
-regime, idempotent across windows):
-
-```
-python -m harness.run_plan --dry-run                        # show pending plan
+# Drive experiments via the resumable runner:
+python -m harness.run_plan --dry-run                  # show pending plan (free)
 python -m harness.run_plan --window-budget 8 --max-turns 200
 ```
 
-The runner scans `harness/results/`, counts already-good trials per
-cell, and resumes by running only what's missing. It aborts cleanly
-on any fatal SDK/rate-limit error so a closed window doesn't burn the
-remaining plan.
+`harness/run_plan` is designed for the 5h-rate-limit regime: it scans
+`harness/results/`, counts good trials per cell, and resumes only what's
+missing, aborting cleanly on any fatal SDK/rate-limit error.
 
-## `legacy/` — what's archived there
+## `legacy/` — archived reference
 
-`legacy/slitherlink-batch-experiment/` contains an earlier attempt
-using a strict file-based **batch protocol** (5 elementary moves per
-batch, file-based reasoning traces, a verifier script). It taught us
-that contract-enforcement scripts catch protocol violations but don't
-help the model reason better, and that bookkeeping overhead crowded
-out actual deduction — motivating the move to MCP tools. Preserved
-verbatim:
-
-- `reasoning_step_1.txt` … `reasoning_step_12.txt` — example outputs
-- `verify_batch.py` — the contract verifier
-- `slitherlink_strategy.md`, `specific_solving_guide.md`,
-  `solving_guide.md` — heuristics
-- `failure_playbook.md`, `chatgpt_improvement_plan.md`, `TODO.txt`
-- `claude.md` — the original project instructions
-- `grid_step_0.txt` — the 5×5 puzzle used
-
-These are kept verbatim for reference. Don't modify them.
+`legacy/slitherlink-batch-experiment/` is an earlier file-based **batch
+protocol** attempt (5 moves/batch, file-based reasoning traces, a verifier).
+It taught us that contract-enforcement scripts catch protocol violations but
+don't help the model reason, and that bookkeeping overhead crowds out
+deduction — motivating the move to MCP tools. **Frozen; do not modify.**
