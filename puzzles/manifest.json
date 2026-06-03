@@ -43,6 +43,19 @@
       "num_clues": 13,
       "notes": "Phase-2 contamination-controlled frontier puzzle (tier-3 by formal grading). Sparse clues, search-required.",
       "file": "gen_7x7_s1_00.txt"
+    },
+    {
+      "id": "gen_7x7_s3_00",
+      "size": "7x7",
+      "difficulty": "tier3",
+      "source": "procedurally generated (core.generator)",
+      "seed": 3,
+      "generator_version": 1,
+      "tier": 3,
+      "search_nodes": 3789,
+      "num_clues": 19,
+      "notes": "Second high-D anchor (revision round); search_nodes near gen_7x7_s1_00's (3789 vs 4547). Used to test whether the high-D toolset-spread collapse generalizes or is a gen_7x7_s1_00 artifact.",
+      "file": "gen_7x7_s3_00.txt"
     }
   ]
 }

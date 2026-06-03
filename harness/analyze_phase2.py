@@ -49,6 +49,12 @@ ANCHORS = [
      "grid": "7×7", "label": "mid (501 nodes)"},
     {"i": 3, "puzzle_id": "gen_7x7_s1_00", "search_nodes": 4547,
      "grid": "7×7", "label": "high (4547 nodes)"},
+    # gen_7x7_s3_00 (3789 nodes) is the revision-round probe puzzle
+    # (see paper appendix); excluded from main figures because the
+    # `none` trial failed to solve. Re-enable when n>=1 solved trials
+    # exist on this puzzle.
+    # {"i": 4, "puzzle_id": "gen_7x7_s3_00", "search_nodes": 3789,
+    #  "grid": "7×7", "label": "high-replicate (3789 nodes)"},
 ]
 # Backwards compatibility: TIERS used to enumerate (i, puzzle_id, label).
 TIERS = [(a["i"], a["puzzle_id"], a["label"]) for a in ANCHORS]
