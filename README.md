@@ -45,6 +45,7 @@ writes raw per-trial JSON to `harness/results/` (gitignored).
 | `e-0008` | puzzle_004 scratchpad meta-on probes | `python -m harness.run_plan` |
 | `e-0009` | gen_7x7_s1_00 Phase-2 frontier, n=3 | `python -m harness.run_plan` → `python -m harness.analyze_phase2` |
 | `e-0010` | model × granularity sweep (Haiku/Sonnet/Opus × 7×7 ladder), n≥3 — *planned* | `python -m harness.run_model_grid` → `python -m harness.analyze_model_x_granularity` (see `notes/2026-06-09_model_x_granularity.md`) |
+| `e-0011` | reasoning-externalization decomposition (turns × $/turn) on existing trials — *no new compute* | `python -m harness.analyze_efficiency_frontier` (see `notes/2026-06-10_reasoning_externalization.md`) |
 
 Difficulty is a *computed* property: `core.generator.grade` tiers each puzzle
 (1 = propagation, 2 = +1-ply, 3+ = search, with `search_nodes`). Frontier
@@ -60,7 +61,8 @@ harness/     run.py, run_subset.py, run_matrix.py, run_plan.py (resumable,
              budget-capped, rate-limit-safe), run_model_grid.py (model ×
              granularity, model-aware resume + own budget gate),
              conditions.py, prompts.py, aggregate_phase1.py,
-             analyze_phase2.py, analyze_model_x_granularity.py, visualize.py
+             analyze_phase2.py, analyze_model_x_granularity.py,
+             analyze_efficiency_frontier.py, visualize.py
 puzzles/     test corpus + manifest.json + generated frontier puzzles
 tests/       smoke tests for core/ and servers/
 legacy/      prior file-based batch protocol — FROZEN reference, do not edit
