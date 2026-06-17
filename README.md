@@ -46,6 +46,7 @@ writes raw per-trial JSON to `harness/results/` (gitignored).
 | `e-0009` | gen_7x7_s1_00 Phase-2 frontier, n=3 | `python -m harness.run_plan` → `python -m harness.analyze_phase2` |
 | `e-0010` | model × granularity sweep (Haiku/Sonnet/Opus × 7×7 ladder), n≥3 — *planned* | `python -m harness.run_model_grid` → `python -m harness.analyze_model_x_granularity` (see `notes/2026-06-09_model_x_granularity.md`) |
 | `e-0011` | reasoning-externalization decomposition (turns × $/turn) on existing trials — *no new compute* | `python -m harness.analyze_efficiency_frontier` (see `notes/2026-06-10_reasoning_externalization.md`) |
+| `e-0012` | context-tax decomposition: output-token saving minus cache-read tax reproduces the Goldilocks cost gap (corr 0.998) on existing trials — *no new compute* | `python -m harness.analyze_context_tax` |
 
 Difficulty is a *computed* property: `core.generator.grade` tiers each puzzle
 (1 = propagation, 2 = +1-ply, 3+ = search, with `search_nodes`). Frontier
